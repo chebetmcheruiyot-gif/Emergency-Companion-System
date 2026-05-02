@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg-deep:      #060f08;
+      --bg-dark:      #091410;
+      --bg-card:      #0d1f14;
+      --green-main:   #1e7a3e;
+      --green-bright: #2ecc71;
+      --green-glow:   rgba(46,204,113,0.22);
+      --green-ghost:  rgba(46,204,113,0.06);
+      --white:        #f0f7f2;
+      --white-dim:    #8fada0;
+      --red:          #e63946;
+      --font-display: 'Rajdhani', sans-serif;
+      --font-mono:    'Share Tech Mono', monospace;
+      --font-body:    'Barlow', sans-serif;
+ 
+      /* alert type colours */
+      --c-medical:        #2ecc71;
+      --c-police:         #4dabf7;
+      --c-fire:           #ff6b35;
+      --c-accident:       #f9c74f;
+      --c-panic:          #e63946;
+      --c-location-share: #a78bfa;
+    }
+ 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    html, body {
+      min-height: 100%; background: var(--bg-deep);
+      color: var(--white); font-family: var(--font-body); overflow-x: hidden;
+    }
+ 
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(46,204,113,0.07) 1px, transparent 1px);
+      background-size: 30px 30px; pointer-events: none; z-index: 0;
+    }
+ 
+    .wrapper { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+ 
+    /* ── HEADER ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 30px;
+      border-bottom: 1px solid rgba(46,204,113,0.1);
+      background: rgba(6,15,8,0.9); backdrop-filter: blur(14px);
+      position: sticky; top: 0; z-index: 100;
+      animation: slideDown 0.5s ease both;
+    }
+    @keyframes slideDown { from{transform:translateY(-100%);opacity:0;} to{transform:translateY(0);opacity:1;} }
+ 
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--white-dim);
+      text-decoration: none; letter-spacing: 2px; text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.08); padding: 6px 14px;
+      border-radius: 20px; transition: all 0.2s;
+    }
+    .back-btn:hover { border-color: var(--green-bright); color: var(--green-bright); }
+ 
+    .page-badge {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-display); font-size: 16px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+    }
+    .badge-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green-bright); box-shadow: 0 0 8px var(--green-bright);
+      animation: blink 1.4s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+ 
+    .total-pill {
+      font-family: var(--font-mono); font-size: 10px; color: var(--green-bright);
+      border: 1px solid rgba(46,204,113,0.25); padding: 5px 13px;
+      border-radius: 20px; background: rgba(46,204,113,0.07);
+    }
+ 
+    /* ── MAIN ── */
+    main { flex: 1; padding: 32px 30px; max-width: 980px; margin: 0 auto; width: 100%; }
+ 
+    /* page title */
+    .page-title { margin-bottom: 28px; animation: fadeUp 0.5s 0.1s ease both; }
+    @keyframes fadeUp { from{transform:translateY(14px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+    .page-title-sub {
+      font-family: var(--font-mono); font-size: 10px; color: var(--green-bright);
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;
+    }
+    .page-title h1 {
+      font-family: var(--font-display); font-size: 34px; font-weight: 700;
+      letter-spacing: 2px; color: var(--white); line-height: 1;
+    }
+    .page-title h1 span { color: var(--green-bright); }
+    .page-title p { margin-top: 7px; font-size: 13px; color: var(--white-dim); font-weight: 300; }
+ 
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+      margin-bottom: 28px; animation: fadeUp 0.5s 0.2s ease both;
+    }
+    .stat-card {
+      padding: 14px 16px; border-radius: 12px;
+      border: 1px solid rgba(46,204,113,0.09);
+      background: var(--green-ghost); text-align: center;
+    }
+    .stat-number {
+      font-family: var(--font-display); font-size: 24px; font-weight: 700;
+      line-height: 1; color: var(--green-bright);
+    }
+    .stat-number.c-medical  { color: var(--c-medical); }
+    .stat-number.c-police   { color: var(--c-police); }
+    .stat-number.c-fire     { color: var(--c-fire); }
+    .stat-number.c-accident { color: var(--c-accident); }
+    .stat-number.c-panic    { color: var(--c-panic); }
+    .stat-label {
+      font-family: var(--font-mono); font-size: 8px; color: var(--white-dim);
+      letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;
+    }
+ 
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 20px; animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .filter-label {
+      font-family: var(--font-mono); font-size: 9px; color: var(--white-dim);
+      letter-spacing: 2px; text-transform: uppercase; white-space: nowrap;
+    }
+    .filter-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 20px; cursor: pointer;
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px;
+      text-transform: uppercase; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03); color: var(--white-dim);
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+    .filter-btn.active {
+      border-color: var(--filter-color, var(--green-bright));
+      background: rgba(46,204,113,0.08); color: var(--filter-color, var(--green-bright));
+      box-shadow: 0 0 10px rgba(46,204,113,0.1);
+    }
+    .filter-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--filter-color, var(--green-bright));
+    }
+ 
+    /* ── ALERT LIST ── */
+    .alert-list {
+      display: flex; flex-direction: column; gap: 12px;
+      animation: fadeUp 0.5s 0.4s ease both;
+    }
+ 
+    /* empty state */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 14px; padding: 60px 20px;
+      text-align: center;
+    }
+    .empty-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--green-ghost); border: 1px solid rgba(46,204,113,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: var(--white-dim);
+    }
+    .empty-title {
+      font-family: var(--font-display); font-size: 18px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--white-dim);
+    }
+    .empty-sub { font-family: var(--font-mono); font-size: 10px; color: var(--white-dim); letter-spacing: 1px; }
+ 
+    /* alert card */
+    .alert-card {
+      display: grid; grid-template-columns: auto 1fr auto;
+      align-items: center; gap: 16px;
+      padding: 18px 20px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(150deg, var(--bg-card), var(--bg-dark));
+      transition: all 0.22s; position: relative; overflow: hidden;
+    }
+    .alert-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--card-color, var(--green-bright));
+      border-radius: 3px 0 0 3px;
+    }
+    .alert-card:hover {
+      border-color: var(--card-color, var(--green-bright));
+      transform: translateX(4px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+    }
+ 
+    /* icon block */
+    .alert-icon-wrap {
+      width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      color: var(--card-color, var(--green-bright));
+    }
+ 
+    /* main info */
+    .alert-info {}
+    .alert-type-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .alert-type-name {
+      font-family: var(--font-display); font-size: 16px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--card-color, var(--green-bright));
+    }
+    .alert-id {
+      font-family: var(--font-mono); font-size: 9px; color: var(--white-dim);
+      letter-spacing: 1px; background: rgba(255,255,255,0.04);
+      padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);
+    }
+    .alert-meta {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .alert-meta-item {
+      display: flex; align-items: center; gap: 5px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--white-dim);
+      letter-spacing: 1px;
+    }
+    .alert-meta-item i { font-size: 10px; color: var(--green-bright); }
+ 
+    /* right side */
+    .alert-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+    .alert-time {
+      font-family: var(--font-mono); font-size: 10px; color: var(--white-dim);
+      letter-spacing: 1px; white-space: nowrap;
+    }
+    .map-link {
+      display: flex; align-items: center; gap: 5px;
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--green-bright);
+      text-decoration: none;
+      border: 1px solid rgba(46,204,113,0.2); padding: 5px 12px;
+      border-radius: 8px; background: rgba(46,204,113,0.06);
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .map-link:hover { background: rgba(46,204,113,0.14); border-color: var(--green-bright); }
+    .no-location {
+      font-family: var(--font-mono); font-size: 9px; color: rgba(143,173,160,0.35);
+      letter-spacing: 1px;
+    }
+ 
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 32px; animation: fadeUp 0.5s 0.5s ease both;
+    }
+    .page-btn {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 12px; cursor: pointer;
+      border: 1px solid rgba(46,204,113,0.12);
+      background: var(--green-ghost); color: var(--white-dim);
+      transition: all 0.2s;
+    }
+    .page-btn:hover { border-color: var(--green-bright); color: var(--green-bright); }
+    .page-btn.active {
+      background: rgba(46,204,113,0.15); border-color: var(--green-bright);
+      color: var(--green-bright); font-weight: 700;
+    }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+ 
+    /* ── FOOTER ── */
+    footer {
+      padding: 13px 30px; border-top: 1px solid rgba(46,204,113,0.07);
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: var(--font-mono); font-size: 9px;
+      color: rgba(143,173,160,0.35); letter-spacing: 1.5px;
+    }
+ 
+    @media (max-width: 680px) {
+      main { padding: 20px 16px; }
+      .stats-row { grid-template-columns: repeat(3,1fr); }
+      .alert-card { grid-template-columns: auto 1fr; }
+      .alert-actions { display: none; }
+      header { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+ 
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <a href="{{ url_for('dashboard') }}" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i> Dashboard
+      </a>
+      <div class="page-badge">
+        <div class="badge-dot"></div>
+        Alert <span style="color:var(--green-bright);">History</span>
+      </div>
+    </div>
+    <div class="total-pill">{{ alerts | length }} TOTAL ALERTS</div>
+  </header>
+ 
+  <!-- MAIN -->
+  <main>
+ 
+    <div class="page-title">
+      <div class="page-title-sub">// Your Emergency Record</div>
+      <h1>ALERT <span>HISTORY</span></h1>
+      <p>All emergency alerts and location shares sent from your account.</p>
+    </div>
+ 
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-number c-medical">{{ counts.medical }}</div>
+        <div class="stat-label">Medical</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number c-police">{{ counts.police }}</div>
+        <div class="stat-label">Police</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number c-fire">{{ counts.fire }}</div>
+        <div class="stat-label">Fire</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number c-accident">{{ counts.accident }}</div>
+        <div class="stat-label">Accident</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number c-panic">{{ counts.panic }}</div>
+        <div class="stat-label">Panic</div>
+      </div>
+    </div>
+ 
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <div class="filter-btn active" style="--filter-color:var(--green-bright)" onclick="filterAlerts('all', this)">
+        <div class="filter-dot"></div> All
+      </div>
+      <div class="filter-btn" style="--filter-color:var(--c-medical)" onclick="filterAlerts('medical', this)">
+        <div class="filter-dot" style="background:var(--c-medical)"></div> Medical
+      </div>
+      <div class="filter-btn" style="--filter-color:var(--c-police)" onclick="filterAlerts('police', this)">
+        <div class="filter-dot" style="background:var(--c-police)"></div> Police
+      </div>
+      <div class="filter-btn" style="--filter-color:var(--c-fire)" onclick="filterAlerts('fire', this)">
+        <div class="filter-dot" style="background:var(--c-fire)"></div> Fire
+      </div>
+      <div class="filter-btn" style="--filter-color:var(--c-accident)" onclick="filterAlerts('accident', this)">
+        <div class="filter-dot" style="background:var(--c-accident)"></div> Accident
+      </div>
+      <div class="filter-btn" style="--filter-color:var(--c-panic)" onclick="filterAlerts('panic', this)">
+        <div class="filter-dot" style="background:var(--c-panic)"></div> Panic
+      </div>
+      <div class="filter-btn" style="--filter-color:var(--c-location-share)" onclick="filterAlerts('location_share', this)">
+        <div class="filter-dot" style="background:var(--c-location-share)"></div> Location
+      </div>
+    </div>
+ 
+    <!-- ALERT LIST -->
+    <div class="alert-list" id="alert-list">
+      {% if alerts %}
+        {% for alert in alerts %}
+ 
+          {# ── determine colour & icon per type ── #}
+          {% if alert.alert_type == 'medical' %}
+            {% set color = '#2ecc71' %} {% set icon = 'fa-kit-medical' %} {% set label = 'Medical Emergency' %}
+          {% elif alert.alert_type == 'police' %}
+            {% set color = '#4dabf7' %} {% set icon = 'fa-shield-halved' %} {% set label = 'Police Emergency' %}
+          {% elif alert.alert_type == 'fire' %}
+            {% set color = '#ff6b35' %} {% set icon = 'fa-fire' %} {% set label = 'Fire Emergency' %}
+          {% elif alert.alert_type == 'accident' %}
+            {% set color = '#f9c74f' %} {% set icon = 'fa-car-burst' %} {% set label = 'Road Accident' %}
+          {% elif alert.alert_type == 'panic' %}
+            {% set color = '#e63946' %} {% set icon = 'fa-bell' %} {% set label = 'Panic Alert' %}
+          {% elif alert.alert_type == 'location_share' %}
+            {% set color = '#a78bfa' %} {% set icon = 'fa-location-dot' %} {% set label = 'Location Shared' %}
+          {% else %}
+            {% set color = '#2ecc71' %} {% set icon = 'fa-circle-exclamation' %} {% set label = alert.alert_type | capitalize %}
+          {% endif %}
+ 
+          <div class="alert-card" style="--card-color:{{ color }};"
+               data-type="{{ alert.alert_type }}">
+ 
+            <!-- icon -->
+            <div class="alert-icon-wrap">
+              <i class="fa-solid {{ icon }}"></i>
+            </div>
+ 
+            <!-- info -->
+            <div class="alert-info">
+              <div class="alert-type-row">
+                <div class="alert-type-name">{{ label }}</div>
+                <div class="alert-id">#{{ alert.id }}</div>
+              </div>
+              <div class="alert-meta">
+                <div class="alert-meta-item">
+                  <i class="fa-regular fa-clock"></i>
+                  {{ alert.timestamp.strftime('%d %b %Y, %H:%M') }}
+                </div>
+                {% if alert.latitude and alert.longitude %}
+                <div class="alert-meta-item">
+                  <i class="fa-solid fa-crosshairs"></i>
+                  {{ "%.4f"|format(alert.latitude|float) }}, {{ "%.4f"|format(alert.longitude|float) }}
+                </div>
+                {% else %}
+                <div class="alert-meta-item">
+                  <i class="fa-solid fa-location-slash"></i>
+                  No location recorded
+                </div>
+                {% endif %}
+              </div>
+            </div>
+ 
+            <!-- actions -->
+            <div class="alert-actions">
+              <div class="alert-time">{{ alert.timestamp.strftime('%H:%M') }}</div>
+            </div>
+ 
+          </div>
+ 
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-bell-slash"></i></div>
+          <div class="empty-title">No Alerts Yet</div>
+          <div class="empty-sub">Your emergency alerts will appear here</div>
+        </div>
+      {% endif %}
+    </div>
+ 
+  </main>
+ 
+  <footer>
+    <span>EMERGENCY RESPONSE SYSTEM v2.0</span>
+    <span id="date-disp"></span>
+  </footer>
+ 
+</div>
+ 
+<script>
+  // Date footer
+  document.getElementById('date-disp').textContent =
+    new Date().toLocaleDateString('en-GB', {weekday:'short',year:'numeric',month:'short',day:'numeric'}).toUpperCase();
+ 
+  // Filter
+  function filterAlerts(type, btn) {
+    // toggle active button
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+ 
+    const cards = document.querySelectorAll('.alert-card');
+    let visible = 0;
+ 
+    cards.forEach(card => {
+      const show = type === 'all' || card.dataset.type === type;
+      card.style.display = show ? 'grid' : 'none';
+      if (show) visible++;
+    });
+ 
+    // show empty state if none visible
+    const list = document.getElementById('alert-list');
+    const existing = list.querySelector('.empty-state');
+    if (visible === 0 && !existing) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state filter-empty';
+      empty.innerHTML = `
+        <div class="empty-icon"><i class="fa-solid fa-filter-circle-xmark"></i></div>
+        <div class="empty-title">No ${type.replace('_',' ')} Alerts</div>
+        <div class="empty-sub">No alerts of this type in your history</div>`;
+      list.appendChild(empty);
+    } else if (visible > 0) {
+      list.querySelectorAll('.filter-empty').forEach(e => e.remove());
+    }
+  }
+</script>
+</body>
+</html>
+ 

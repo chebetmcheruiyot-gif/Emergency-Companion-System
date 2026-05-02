@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Police Emergency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/police.css') }}">
+</head>
+<body>
+<div class="wrapper">
+  <div class="hotline-bar">
+    <div class="hotline-label">🚨 Emergency Hotlines</div>
+    <div class="hotline-numbers">
+      <a class="hotline-item" href="tel:999"><i class="fa-solid fa-phone"></i> Police <strong>999</strong></a>
+      <a class="hotline-item" href="tel:112"><i class="fa-solid fa-phone"></i> Emergency <strong>112</strong></a>
+      <a class="hotline-item" href="tel:0800722203"><i class="fa-solid fa-phone"></i> Kenya Police <strong>0800 722 203</strong></a>
+    </div>
+  </div>
+  <header>
+    <div class="header-left">
+      <a href="{{ url_for('dashboard') }}" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+      <div class="page-badge"><div class="badge-dot"></div><span style="color:var(--accent);">Police</span> Emergency</div>
+    </div>
+    <div class="alert-sent-pill"><i class="fa-solid fa-circle-check"></i> ALERT SENT TO RESPONDERS</div>
+  </header>
+  <main>
+    <div class="page-title">
+      <div class="page-title-sub">// Security Response Protocol</div>
+      <h1>POLICE <span>EMERGENCY</span></h1>
+      <p>Stay calm. SHELL is available bottom-right to guide you. Submit suspect details below.</p>
+    </div>
+    <div class="two-col">
+      <div class="guide-card" style="animation-delay:0.1s">
+        <div class="guide-card-icon"><i class="fa-solid fa-person-shelter"></i></div>
+        <h3>Secure Your Location</h3>
+        <ul><li>Lock all doors and windows immediately.</li><li>Stay away from windows — move to a central room.</li><li>Silence your phone and turn off lights.</li><li>Stay low if you hear threats nearby.</li><li>Do not open the door until police confirm.</li></ul>
+        <i class="fa-solid fa-person-shelter card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.2s">
+        <div class="guide-card-icon"><i class="fa-solid fa-user-shield"></i></div>
+        <h3>Personal Safety</h3>
+        <ul><li><strong>Stay Calm:</strong> Panic reduces clear thinking.</li><li><strong>Avoid Conflict:</strong> Do not confront or escalate.</li><li><strong>Move to Safety:</strong> Leave if you safely can.</li><li><strong>Memorise Details:</strong> Note time, location, appearance.</li></ul>
+        <i class="fa-solid fa-user-shield card-bg-icon"></i>
+      </div>
+    </div>
+    <div class="one-col">
+      <div class="guide-card" style="animation-delay:0.3s">
+        <div class="guide-card-icon"><i class="fa-solid fa-file-lines"></i></div>
+        <h3>Describe the Incident</h3>
+        <textarea class="incident-textarea" id="incident-text" placeholder="Describe what is happening — location, number of suspects, type of threat, weapons seen…"></textarea>
+        <button class="send-btn" onclick="sendIncident()"><i class="fa-solid fa-paper-plane"></i> &nbsp;SEND INCIDENT REPORT</button>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="guide-card" style="animation-delay:0.4s">
+        <div class="guide-card-icon"><i class="fa-solid fa-user-secret"></i></div>
+        <h3>Suspect Details</h3>
+        <form action="/emergency/police_report" method="POST">
+          <div class="form-grid">
+            <div class="form-group"><div class="form-label">Height</div><select name="height" class="form-select"><option value="">Select</option><option>Short (Below 5'5")</option><option>Medium (5'6"–5'11")</option><option>Tall (Above 6'0")</option></select></div>
+            <div class="form-group"><div class="form-label">Build</div><select name="build" class="form-select"><option value="">Select</option><option>Slim</option><option>Medium</option><option>Heavy</option></select></div>
+            <div class="form-group"><div class="form-label">Clothing</div><select name="clothing" class="form-select"><option value="">Select</option><option>Casual</option><option>Hoodie/Jacket</option><option>Formal</option><option>Uniform</option></select></div>
+            <div class="form-group"><div class="form-label">Colour</div><select name="color" class="form-select"><option value="">Select</option><option>Black</option><option>White</option><option>Red</option><option>Blue</option><option>Grey</option></select></div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;"><div class="form-label">Other Marks</div><textarea name="notes" class="form-textarea" placeholder="Tattoos, vehicle plate, weapon…"></textarea></div>
+          <button type="submit" class="send-btn"><i class="fa-solid fa-tower-broadcast"></i> &nbsp;SEND TO DISPATCH</button>
+        </form>
+        <i class="fa-solid fa-user-secret card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.45s">
+        <div class="guide-card-icon"><i class="fa-solid fa-handcuffs"></i></div>
+        <h3>When Police Arrive</h3>
+        <ul><li><strong>Hands visible:</strong> Keep hands where officers can see.</li><li><strong>Don't run:</strong> No sudden movements.</li><li><strong>Follow commands:</strong> Comply with all instructions.</li><li><strong>Provide ID:</strong> Identify yourself clearly.</li><li><strong>Give details:</strong> Suspect direction of travel.</li></ul>
+        <i class="fa-solid fa-handcuffs card-bg-icon"></i>
+      </div>
+    </div>
+  </main>
+  <footer><span>EMERGENCY RESPONSE SYSTEM v2.0</span><span>POLICE PROTOCOL</span></footer>
+</div>
+
+<!-- SHELL FLOATING WIDGET (UPDATED MIC – LONGER LISTENING) -->
+<div class="shell-trigger" id="shellTrigger" onclick="toggleShell()">
+  <div class="shell-badge" id="shellBadge">1</div>
+  <div class="shell-name">SHELL</div>
+  <div class="shell-sub">TAP TO CHAT</div>
+</div>
+<div class="shell-window" id="shellWindow">
+  <div class="shell-win-header">
+    <div class="shell-avatar">SH</div>
+    <div class="shell-win-info">
+      <div class="shell-win-name">SHELL</div>
+      <div class="shell-win-status">● ONLINE — Security Assistant</div>
+    </div>
+    <button class="shell-win-close" onclick="toggleShell()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="shell-messages" id="shellMessages"></div>
+  <div class="shell-input-row">
+    <button class="shell-mic" id="shellMic" onclick="requestMicAndStart()" title="Speak to SHELL">
+      <i class="fa-solid fa-microphone" id="shellMicIcon"></i>
+    </button>
+    <input class="shell-input" id="shellInput" type="text" placeholder="Type or speak your emergency…"/>
+    <button class="shell-send" onclick="sendToShell()"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+  <div class="shell-footer">POWERED BY SHELL — BY MICHELL</div>
+</div>
+
+<script>
+  const OPENING_MSG = "Hi there! I'm <strong>SHELL</strong>, your security emergency assistant. 🛡️<br><br>Tell me about the threat or incident and I'll guide you on what to do right now. Type or tap 🎤 to speak.";
+  let shellOpen = false;
+  let recognition = null;
+  let listening = false;
+  let mediaStream = null;
+  let silenceTimer = null;
+  let accumulatedTranscript = "";
+  let micRetryCount = 0;
+  const MAX_MIC_RETRIES = 2;
+  const SILENCE_DELAY_MS = 2000;
+
+  function getTime() {
+    return new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  }
+  function appendMsg(text, type) {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = `sh-msg ${type}`;
+    const isBot = type === 'bot';
+    div.innerHTML = `<div class="sh-msg-av">${isBot ? 'SH' : '<i class="fa-solid fa-user"></i>'}</div><div><div class="sh-msg-bubble">${text}</div><div class="sh-msg-time">${getTime()}</div></div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+  function showTyping() {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = 'sh-msg bot';
+    div.id = 'sh-typing';
+    div.innerHTML = `<div class="sh-msg-av">SH</div><div class="sh-msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+  function removeTyping() {
+    const t = document.getElementById('sh-typing');
+    if (t) t.remove();
+  }
+  function sendToShell(textOverride) {
+    const inputEl = document.getElementById('shellInput');
+    const msg = textOverride || inputEl.value.trim();
+    if (!msg) return;
+    appendMsg(msg, 'user');
+    inputEl.value = '';
+    showTyping();
+    fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    })
+    .then(r => r.json())
+    .then(data => {
+      removeTyping();
+      appendMsg(data.response || 'Please call <strong>999</strong> immediately.', 'bot');
+    })
+    .catch(() => {
+      removeTyping();
+      appendMsg('Network error. Call <strong>999</strong>.', 'bot');
+    });
+  }
+  document.getElementById('shellInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendToShell();
+  });
+  function toggleShell() {
+    shellOpen = !shellOpen;
+    document.getElementById('shellWindow').classList.toggle('open', shellOpen);
+    if (shellOpen) {
+      const badge = document.getElementById('shellBadge');
+      if (badge) badge.remove();
+      const msgsEl = document.getElementById('shellMessages');
+      if (msgsEl.children.length === 0) appendMsg(OPENING_MSG, 'bot');
+      setTimeout(() => document.getElementById('shellInput').focus(), 350);
+    }
+  }
+  function sendIncident() {
+    const text = document.getElementById('incident-text').value.trim();
+    if (!text) {
+      alert('Please describe the incident.');
+      return;
+    }
+    if (!shellOpen) toggleShell();
+    sendToShell(text);
+    document.getElementById('incident-text').value = '';
+  }
+
+  // Microphone with manual silence detection (longer listening)
+  function requestMicAndStart() {
+    micRetryCount = 0;
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      appendMsg("Voice input not supported. Please use Chrome or Edge.", 'bot');
+      return;
+    }
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (!isLocal && location.protocol !== 'https:') {
+      appendMsg("Microphone requires HTTPS or localhost.", 'bot');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaStream = stream;
+        startContinuousRecognition();
+      })
+      .catch(err => {
+        let msg = "Microphone error: " + (err.name === 'NotAllowedError' ? "Permission denied." : err.message);
+        appendMsg(msg, 'bot');
+      });
+  }
+
+  function startContinuousRecognition() {
+    if (listening && recognition) {
+      recognition.stop();
+      return;
+    }
+    accumulatedTranscript = "";
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+    
+    recognition.onstart = () => {
+      listening = true;
+      document.getElementById('shellMic').classList.add('listening');
+      document.getElementById('shellMicIcon').className = 'fa-solid fa-stop';
+      appendMsg("🎤 Listening... (speak freely, I'll wait for 2 seconds of silence)", 'bot');
+    };
+    
+    recognition.onresult = (event) => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript + " ";
+        }
+      }
+      accumulatedTranscript += final;
+      
+      silenceTimer = setTimeout(() => {
+        if (accumulatedTranscript.trim().length > 0) {
+          const finalText = accumulatedTranscript.trim();
+          document.getElementById('shellInput').value = finalText;
+          sendToShell(finalText);
+          accumulatedTranscript = "";
+        } else {
+          appendMsg("No speech detected. Try speaking again.", 'bot');
+        }
+        if (recognition) recognition.stop();
+      }, SILENCE_DELAY_MS);
+    };
+    
+    recognition.onerror = (event) => {
+      console.error("Speech error", event.error);
+      if (event.error === 'network' && micRetryCount < MAX_MIC_RETRIES) {
+        micRetryCount++;
+        appendMsg(`Connection issue. Retrying... (${micRetryCount}/${MAX_MIC_RETRIES})`, 'bot');
+        setTimeout(() => { if (recognition) recognition.start(); }, 1000);
+        return;
+      }
+      let msg = "Voice error: ";
+      if (event.error === 'network') msg += "Check internet connection.";
+      else if (event.error === 'no-speech') msg += "No speech detected.";
+      else msg += event.error;
+      appendMsg(msg, 'bot');
+      stopMicUI();
+    };
+    
+    recognition.onend = () => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      stopMicUI();
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+    };
+    
+    recognition.start();
+  }
+
+  function stopMicUI() {
+    listening = false;
+    const micBtn = document.getElementById('shellMic');
+    micBtn.classList.remove('listening');
+    document.getElementById('shellMicIcon').className = 'fa-solid fa-microphone';
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+      recognition = null;
+    }
+  }
+
+  setTimeout(() => {
+    const badge = document.getElementById('shellBadge');
+    if (badge && !shellOpen) {
+      badge.style.animation = 'badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
+    }
+  }, 3000);
+</script>
+</body>
+</html>

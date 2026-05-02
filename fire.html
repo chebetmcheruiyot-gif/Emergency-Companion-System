@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire Emergency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fire.css') }}">
+</head>
+<body>
+<div class="wrapper">
+  <div class="hotline-bar">
+    <div class="hotline-label">🚨 Emergency Hotlines</div>
+    <div class="hotline-numbers">
+      <a class="hotline-item" href="tel:999"><i class="fa-solid fa-phone"></i> Fire Brigade <strong>999</strong></a>
+      <a class="hotline-item" href="tel:112"><i class="fa-solid fa-phone"></i> Emergency <strong>112</strong></a>
+      <a class="hotline-item" href="tel:020222181"><i class="fa-solid fa-phone"></i> Nairobi Fire <strong>020 222 181</strong></a>
+    </div>
+  </div>
+  <header>
+    <div class="header-left">
+      <a href="{{ url_for('dashboard') }}" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+      <div class="page-badge"><div class="badge-dot"></div><span style="color:var(--accent);">Fire</span> Emergency</div>
+    </div>
+    <div class="alert-sent-pill"><i class="fa-solid fa-circle-check"></i> ALERT SENT TO RESPONDERS</div>
+  </header>
+  <main>
+    <div class="page-title">
+      <div class="page-title-sub">// Fire Response Protocol</div>
+      <h1>FIRE <span>EMERGENCY</span></h1>
+      <p>Select your fire type for specific steps. SHELL is available bottom-right to guide you.</p>
+    </div>
+    <div class="section-label">// Select Fire Type</div>
+    <div class="type-tabs">
+      <div class="type-tab active" onclick="selectType('house')" id="tab-house"><i class="fa-solid fa-house"></i> House Fire</div>
+      <div class="type-tab" onclick="selectType('gas')" id="tab-gas"><i class="fa-solid fa-gas-pump"></i> Gas Fire</div>
+      <div class="type-tab" onclick="selectType('electrical')" id="tab-electrical"><i class="fa-solid fa-bolt"></i> Electrical</div>
+      <div class="type-tab" onclick="selectType('wildfire')" id="tab-wildfire"><i class="fa-solid fa-tree"></i> Wildfire</div>
+    </div>
+    <div class="fire-steps" id="fire-steps"></div>
+    <div class="section-label" style="margin-bottom:14px;">// General Fire Safety</div>
+    <div class="guide-grid">
+      <div class="guide-card" style="animation-delay:0.3s">
+        <div class="guide-card-icon"><i class="fa-solid fa-fire-extinguisher"></i></div>
+        <h3>Using Extinguisher</h3>
+        <ul><li><strong>PULL</strong> the safety pin.</li><li><strong>AIM</strong> at the base of the fire.</li><li><strong>SQUEEZE</strong> the handle slowly.</li><li><strong>SWEEP</strong> side to side across the base.</li></ul>
+        <i class="fa-solid fa-fire-extinguisher card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.35s">
+        <div class="guide-card-icon"><i class="fa-solid fa-smog"></i></div>
+        <h3>Smoke Safety</h3>
+        <ul><li><strong>Stay Low:</strong> Crawl under smoke for cleaner air.</li><li><strong>Cover Nose:</strong> Use wet cloth if available.</li><li><strong>Check Doors:</strong> Feel with back of hand first.</li><li><strong>Seal Gaps:</strong> Block smoke with towels if trapped.</li></ul>
+        <i class="fa-solid fa-smog card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.4s">
+        <div class="guide-card-icon"><i class="fa-solid fa-person-running"></i></div>
+        <h3>Escape Plan</h3>
+        <ul><li><strong>Know Exits:</strong> Two ways out of every room.</li><li><strong>Meeting Point:</strong> Agree a safe place outside.</li><li><strong>Help Others:</strong> Children and elderly first.</li><li><strong>Never Return:</strong> Do not go back inside.</li></ul>
+        <i class="fa-solid fa-person-running card-bg-icon"></i>
+      </div>
+    </div>
+  </main>
+  <footer><span>EMERGENCY RESPONSE SYSTEM v2.0</span><span>FIRE PROTOCOL</span></footer>
+</div>
+
+<!-- SHELL FLOATING WIDGET (UPDATED MIC – LONGER LISTENING) -->
+<div class="shell-trigger" id="shellTrigger" onclick="toggleShell()">
+  <div class="shell-badge" id="shellBadge">1</div>
+  <div class="shell-name">SHELL</div>
+  <div class="shell-sub">TAP TO CHAT</div>
+</div>
+<div class="shell-window" id="shellWindow">
+  <div class="shell-win-header">
+    <div class="shell-avatar">SH</div>
+    <div class="shell-win-info">
+      <div class="shell-win-name">SHELL</div>
+      <div class="shell-win-status">● ONLINE — Fire Assistant</div>
+    </div>
+    <button class="shell-win-close" onclick="toggleShell()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="shell-messages" id="shellMessages"></div>
+  <div class="shell-input-row">
+    <button class="shell-mic" id="shellMic" onclick="requestMicAndStart()" title="Speak to SHELL">
+      <i class="fa-solid fa-microphone" id="shellMicIcon"></i>
+    </button>
+    <input class="shell-input" id="shellInput" type="text" placeholder="Type or speak your emergency…"/>
+    <button class="shell-send" onclick="sendToShell()"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+  <div class="shell-footer">POWERED BY SHELL — BY MICHELL</div>
+</div>
+
+<script>
+  // Fire type selection data
+  const fireTypes={
+    house:{icon:'fa-house',title:'House Fire — Immediate Steps',steps:[{bold:'Alert everyone:',text:'Shout "Fire!" to warn all occupants.'},{bold:'Evacuate now:',text:'Leave through nearest exit. No elevators.'},{bold:'Stay low:',text:'Crawl if there is smoke — cleaner air near the floor.'},{bold:'Close doors:',text:'Close doors behind you to slow spread.'},{bold:'Call 999:',text:'From outside — give your exact address.'},{bold:'Never return:',text:'Do not go back for belongings.'}]},
+    gas:{icon:'fa-gas-pump',title:'Gas Fire / Leak — Immediate Steps',steps:[{bold:'No ignition:',text:'No flames, sparks, or electrical switches at all.'},{bold:'Evacuate:',text:'Get everyone out of the building fast.'},{bold:'Open doors:',text:'Ventilate on your way out.'},{bold:'Move far away:',text:'At least 100m before calling.'},{bold:'Call 999:',text:'Report from a safe distance outside.'},{bold:'Do not re-enter:',text:'Wait for emergency services.'}]},
+    electrical:{icon:'fa-bolt',title:'Electrical Fire — Immediate Steps',steps:[{bold:'Cut power:',text:'Switch off at mains if safe.'},{bold:'No water:',text:'Water conducts electricity — never use it.'},{bold:'Class C extinguisher:',text:'Dry powder or CO2 only.'},{bold:'Evacuate:',text:'If fire grows — get out and call 999.'},{bold:'Don\'t touch:',text:'Never touch equipment that may be live.'},{bold:'Report it:',text:'Call fire services even if seemingly controlled.'}]},
+    wildfire:{icon:'fa-tree',title:'Wildfire — Immediate Steps',steps:[{bold:'Evacuate early:',text:'Leave as soon as you see or smell smoke.'},{bold:'Move against wind:',text:'Fire follows wind — move perpendicular.'},{bold:'Avoid valleys:',text:'Fire spreads faster uphill — go to open flat ground.'},{bold:'Cover up:',text:'Protect skin from radiant heat.'},{bold:'Call 999:',text:'Give exact location — GPS if possible.'},{bold:'If trapped:',text:'Lie face down in a depression, cover with soil.'}]}
+  };
+  function selectType(type){
+    document.querySelectorAll('.type-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+type).classList.add('active');
+    const d=fireTypes[type];
+    document.getElementById('fire-steps').innerHTML=`<h3><i class="fa-solid ${d.icon}"></i> ${d.title}</h3><div class="steps-list">${d.steps.map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text"><strong>${s.bold}</strong> ${s.text}</div></div>`).join('')}</div>`;
+  }
+  selectType('house');
+
+  // ── SHELL with longer listening microphone ──
+  let shellOpen = false;
+  let recognition = null;
+  let listening = false;
+  let mediaStream = null;
+  let silenceTimer = null;
+  let accumulatedTranscript = "";
+  let micRetryCount = 0;
+  const MAX_MIC_RETRIES = 2;
+  const SILENCE_DELAY_MS = 2000;   // Wait 2 seconds of silence before sending
+  const OPENING_MSG = "Hi there! I'm <strong>SHELL</strong>, your fire emergency assistant. 🔥<br><br>Tell me what's burning or what you can smell and I'll give you specific steps right away. Type or tap the 🎤 mic to speak.";
+
+  function getTime() {
+    return new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  }
+  function appendMsg(text, type) {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = `sh-msg ${type}`;
+    const isBot = type === 'bot';
+    div.innerHTML = `<div class="sh-msg-av">${isBot ? 'SH' : '<i class="fa-solid fa-user"></i>'}</div><div><div class="sh-msg-bubble">${text}</div><div class="sh-msg-time">${getTime()}</div></div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+  function showTyping() {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = 'sh-msg bot';
+    div.id = 'sh-typing';
+    div.innerHTML = `<div class="sh-msg-av">SH</div><div class="sh-msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+  function removeTyping() {
+    const t = document.getElementById('sh-typing');
+    if (t) t.remove();
+  }
+  function sendToShell(textOverride) {
+    const inputEl = document.getElementById('shellInput');
+    const msg = textOverride || inputEl.value.trim();
+    if (!msg) return;
+    appendMsg(msg, 'user');
+    inputEl.value = '';
+    showTyping();
+    fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    })
+    .then(r => r.json())
+    .then(data => {
+      removeTyping();
+      appendMsg(data.response || 'Please call <strong>999</strong> immediately.', 'bot');
+    })
+    .catch(() => {
+      removeTyping();
+      appendMsg('Network error. Call <strong>999</strong>.', 'bot');
+    });
+  }
+  document.getElementById('shellInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendToShell();
+  });
+  function toggleShell() {
+    shellOpen = !shellOpen;
+    document.getElementById('shellWindow').classList.toggle('open', shellOpen);
+    if (shellOpen) {
+      const badge = document.getElementById('shellBadge');
+      if (badge) badge.remove();
+      const msgsEl = document.getElementById('shellMessages');
+      if (msgsEl.children.length === 0) appendMsg(OPENING_MSG, 'bot');
+      setTimeout(() => document.getElementById('shellInput').focus(), 350);
+    }
+  }
+
+  // Microphone with manual silence detection (longer listening)
+  function requestMicAndStart() {
+    micRetryCount = 0;
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      appendMsg("Voice input not supported. Please use Chrome or Edge.", 'bot');
+      return;
+    }
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (!isLocal && location.protocol !== 'https:') {
+      appendMsg("Microphone requires HTTPS or localhost.", 'bot');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaStream = stream;
+        startContinuousRecognition();
+      })
+      .catch(err => {
+        let msg = "Microphone error: " + (err.name === 'NotAllowedError' ? "Permission denied." : err.message);
+        appendMsg(msg, 'bot');
+      });
+  }
+
+  function startContinuousRecognition() {
+    if (listening && recognition) {
+      recognition.stop();
+      return;
+    }
+    accumulatedTranscript = "";
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+    
+    recognition.onstart = () => {
+      listening = true;
+      document.getElementById('shellMic').classList.add('listening');
+      document.getElementById('shellMicIcon').className = 'fa-solid fa-stop';
+      appendMsg("🎤 Listening... (speak freely, I'll wait for 2 seconds of silence)", 'bot');
+    };
+    
+    recognition.onresult = (event) => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript + " ";
+        }
+      }
+      accumulatedTranscript += final;
+      
+      silenceTimer = setTimeout(() => {
+        if (accumulatedTranscript.trim().length > 0) {
+          const finalText = accumulatedTranscript.trim();
+          document.getElementById('shellInput').value = finalText;
+          sendToShell(finalText);
+          accumulatedTranscript = "";
+        } else {
+          appendMsg("No speech detected. Try speaking again.", 'bot');
+        }
+        if (recognition) recognition.stop();
+      }, SILENCE_DELAY_MS);
+    };
+    
+    recognition.onerror = (event) => {
+      console.error("Speech error", event.error);
+      if (event.error === 'network' && micRetryCount < MAX_MIC_RETRIES) {
+        micRetryCount++;
+        appendMsg(`Connection issue. Retrying... (${micRetryCount}/${MAX_MIC_RETRIES})`, 'bot');
+        setTimeout(() => { if (recognition) recognition.start(); }, 1000);
+        return;
+      }
+      let msg = "Voice error: ";
+      if (event.error === 'network') msg += "Check internet connection.";
+      else if (event.error === 'no-speech') msg += "No speech detected.";
+      else msg += event.error;
+      appendMsg(msg, 'bot');
+      stopMicUI();
+    };
+    
+    recognition.onend = () => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      stopMicUI();
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+    };
+    
+    recognition.start();
+  }
+
+  function stopMicUI() {
+    listening = false;
+    const micBtn = document.getElementById('shellMic');
+    micBtn.classList.remove('listening');
+    document.getElementById('shellMicIcon').className = 'fa-solid fa-microphone';
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+      recognition = null;
+    }
+  }
+
+  setTimeout(() => {
+    const badge = document.getElementById('shellBadge');
+    if (badge && !shellOpen) {
+      badge.style.animation = 'badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
+    }
+  }, 3000);
+</script>
+</body>
+</html>

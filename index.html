@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Companion System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+
+</head>
+<body>
+ 
+  <!-- backgrounds -->
+  <div class="grid-bg"></div>
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="scanline"></div>
+  <div class="v-line left"></div>
+  <div class="v-line right"></div>
+ 
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-shield-heart"></i></div>
+      <div class="logo-text">EMER<span>GENCY</span></div>
+    </div>
+    <div class="top-status">
+      <div class="status-dot"></div>
+      SYSTEM ONLINE
+    </div>
+  </div>
+ 
+  <!-- HERO -->
+  <div class="wrapper">
+    <div class="hero">
+ 
+      <div class="sys-tag">
+        <i class="fa-solid fa-satellite-dish"></i>
+        Emergency Response System · Active
+      </div>
+ 
+      <div class="hero-title">
+        EMERGENCY<br>
+        <span class="accent">COMPANION</span><br>
+        <span class="outline">SYSTEM</span>
+      </div>
+ 
+      <div class="hero-tagline">// Your Safety. Our Priority.</div>
+      <div class="accent-line"></div>
+ 
+      <p class="hero-desc">
+        Real-time emergency response system.
+        Medical, fire, police and accident alerts — with live GPS tracking
+        and your personal emergency assistant <strong>SHELL</strong>.
+      </p>
+ 
+      <div class="cta-group">
+        <a href="{{ url_for('register') }}" class="btn-get-started">
+          <i class="fa-solid fa-shield-heart"></i>
+          GET STARTED
+        </a>
+        <a href="{{ url_for('login') }}" class="btn-login">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          LOGIN
+        </a>
+      </div>
+ 
+      <div class="features">
+        <div class="feature-pill"><i class="fa-solid fa-location-dot"></i> Live GPS</div>
+        <div class="feature-pill"><i class="fa-solid fa-robot"></i> AI Assistant</div>
+        <div class="feature-pill"><i class="fa-solid fa-microphone"></i> Voice Input</div>
+        <div class="feature-pill"><i class="fa-solid fa-bell"></i> Panic Alert</div>
+        <div class="feature-pill"><i class="fa-solid fa-shield-halved"></i> 4 Emergency Types</div>
+      </div>
+ 
+    </div>
+  </div>
+ 
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <span>EMERGENCY RESPONSE SYSTEM v2.0</span>
+    <span id="clock">--:--:--</span>
+  </div>
+ 
+  <script>
+    function tick() {
+      document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString('en-GB', { hour12: false });
+    }
+    tick(); setInterval(tick, 1000);
+  </script>
+ 
+</body>
+</html>

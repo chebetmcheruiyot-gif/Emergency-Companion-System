@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — Emergency System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg-deep:#060f08;--bg-card:#0d1f14;--green-main:#1e7a3e;
+      --green-bright:#2ecc71;--green-glow:rgba(46,204,113,0.22);
+      --white:#f0f7f2;--white-dim:#8fada0;--red:#e63946;
+      --font-display:'Rajdhani',sans-serif;--font-mono:'Share Tech Mono',monospace;--font-body:'Barlow',sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{min-height:100%;background:var(--bg-deep);color:var(--white);font-family:var(--font-body);}
+    body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(46,204,113,0.07) 1px,transparent 1px);background-size:30px 30px;pointer-events:none;z-index:0;}
+    .wrapper{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+ 
+    .card{width:100%;max-width:400px;background:var(--bg-card);border:1px solid rgba(230,57,70,0.2);border-radius:18px;padding:36px 32px;box-shadow:0 24px 60px rgba(0,0,0,0.6),0 0 30px rgba(230,57,70,0.06);animation:fadeUp 0.5s ease both;}
+    @keyframes fadeUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+ 
+    .card-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#00828b,var(--red));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:0 0 20px rgba(230,57,70,0.3);margin:0 auto 20px;}
+    .card-title{font-family:var(--font-display);font-size:26px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white);text-align:center;margin-bottom:4px;}
+    .card-sub{font-family:var(--font-mono);font-size:10px;color:var(--red);letter-spacing:2px;text-align:center;margin-bottom:28px;}
+ 
+    .flash{padding:11px 14px;border-radius:9px;font-size:12px;margin-bottom:18px;font-family:var(--font-mono);letter-spacing:1px;}
+    .flash.danger{background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.25);color:var(--red);}
+ 
+    .field{margin-bottom:16px;}
+    .field-label{font-family:var(--font-mono);font-size:9px;color:var(--white-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;display:block;}
+    .field-wrap{position:relative;}
+    .field-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--white-dim);font-size:13px;}
+    .field-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(21, 2, 3, 0.2);border-radius:10px;padding:12px 14px 12px 38px;color:var(--white);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color 0.2s;}
+    .field-input:focus{border-color:var(--bg-deep);box-shadow:0 0 8px rgba(230,57,70,0.12);}
+    .field-input::placeholder{color:var(--white-dim);}
+ 
+    .submit-btn{width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,#66008b,var(--red));color:#fff;font-family:var(--font-display);font-size:16px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.22s;box-shadow:0 4px 16px rgba(230,57,70,0.3);margin-top:8px;}
+    .submit-btn:hover{box-shadow:0 4px 24px rgba(230,57,70,0.5);transform:translateY(-1px);}
+ 
+    .back-link{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:18px;font-family:var(--font-mono);font-size:10px;color:var(--white-dim);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color 0.2s;}
+    .back-link:hover{color:var(--green-bright);}
+ 
+    .warning-box{background:rgba(230,57,70,0.05);border:1px solid rgba(230,57,70,0.15);border-radius:10px;padding:12px 14px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;}
+    .warning-box i{color:var(--red);font-size:13px;margin-top:1px;flex-shrink:0;}
+    .warning-box p{font-family:var(--font-mono);font-size:10px;color:var(--white-dim);letter-spacing:1px;line-height:1.7;}
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div class="card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <div class="card-title">Admin Access</div>
+    <div class="card-sub">// Restricted — Authorised Personnel Only</div>
+ 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+ 
+ 
+    <form method="POST" action="{{ url_for('admin_login') }}">
+      <div class="field">
+        <label class="field-label">Admin Username</label>
+        <div class="field-wrap">
+          <i class="fa-solid fa-user-shield field-icon"></i>
+          <input class="field-input" type="text" name="username" placeholder="admin username" required autocomplete="off">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Admin Password</label>
+        <div class="field-wrap">
+          <i class="fa-solid fa-lock field-icon"></i>
+          <input class="field-input" type="password" name="password" placeholder="admin password" required>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn">
+        <i class="fa-solid fa-right-to-bracket"></i> ACCESS PANEL
+      </button>
+    </form>
+ 
+    <a href="{{ url_for('login') }}" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to User Login
+    </a>
+  </div>
+</div>
+</body>
+</html>
+ 

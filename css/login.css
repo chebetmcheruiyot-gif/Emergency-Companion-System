@@ -1,0 +1,185 @@
+/* Fullscreen background */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", sans-serif;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* Background hologram */
+.screen {
+  width: 100%;
+  height: 100%;
+  background: url("../images/login-bg.png") no-repeat center center/cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* The inner glowing rectangle where the form sits */
+.holo-frame {
+  width: 700px;
+  height: 420px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Slight blur to blend with image */
+  backdrop-filter: blur(2px);
+}
+
+/* The content inside the frame */
+.holo-content {
+  width: 70%;
+  text-align: center;
+}
+
+/* Emergency Access title */
+.title {
+  color: #ff8c32;
+  font-size: 26px;
+  margin-bottom: 25px;
+  letter-spacing: 2px;
+}
+
+/* Input styling */
+.input-group input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 170, 255, 0.4);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #30baff;
+  box-shadow: 0 0 10px #30baff;
+}
+
+/* Options section */
+.options {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+.options a {
+  color: #30baff;
+  text-decoration: none;
+}
+
+/* Buttons */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  transition: 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Blue login button */
+.login-btn {
+  background: #30baff;
+  color: #000;
+}
+
+.login-btn:hover {
+  background: #1a8ac4;
+}
+
+/* Orange register button */
+.register-btn {
+  background: #ff8c32;
+  color: #000;
+}
+
+.register-btn:hover {
+  background: #e87a21;
+}
+
+/* Flash messages */
+.alert {
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.alert-success {
+  background: rgba(0, 255, 100, 0.2);
+  border: 1px solid #00ff88;
+}
+
+.alert-danger {
+  background: rgba(255, 0, 0, 0.2);
+  border: 1px solid #ff4444;
+}
+
+    /* Admin button — added only, nothing else changed */
+    .admin-access-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+      padding: 8px 20px;
+      border-radius: 6px;
+      border: 1px solid rgba(57, 57, 230, 0.4);
+      background: lightskyblue;
+      color: black;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+    .admin-access-link:hover {
+      background: rgba(103, 57, 230, 0.2);
+      border-color: #6344ff;
+      box-shadow: 0 0 10px rgba(230, 57, 70, 0.3);
+      color: white;
+    }
+    .admin-access-link svg {
+      width: 13px; height: 13px; fill: currentColor;
+    }
+    .admin-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 2px;
+    }
+    .admin-divider::before, .admin-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+  
