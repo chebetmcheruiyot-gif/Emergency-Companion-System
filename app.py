@@ -26,7 +26,7 @@ app = Flask(
 )
  
 app.config["SECRET_KEY"]                     = os.getenv("SECRET_KEY", "emergency-secret-key-2024")
-app.config["SQLALCHEMY_DATABASE_URI"]        = "sqlite:///users.db"
+app.config["SQLALCHEMY_DATABASE_URI"]        = os.environ.get("DATABASE_URL", "sqlite:///users.db").replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["MAIL_SERVER"]                    = "smtp.gmail.com"
 app.config["MAIL_PORT"]                      = 587
@@ -680,8 +680,8 @@ def send_alert(alert_type):
     db.session.commit()
  
     user = User.query.get(session['user_id'])
-    #send_kin_sms(user, alert_type, lat, lng)
-    #send_user_alert_email(user, alert_type, lat, lng)   # ← NEW
+    send_kin_sms(user, alert_type, lat, lng)
+    send_user_alert_email(user, alert_type, lat, lng)   # ← NEW
  
     total = Alert.query.filter_by(user_id=session['user_id']).count()
     return jsonify({'status': 'ok', 'total_alerts': total})
