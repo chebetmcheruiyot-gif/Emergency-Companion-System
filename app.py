@@ -20,8 +20,8 @@ from ml.chat_engine import get_response  # type: ignore (fallback only)
  
 app = Flask(
     __name__,
-    template_folder="../frontend/templates",
-    static_folder="../frontend/static",
+    template_folder="frontend/templates",
+    static_folder="frontend/static",
     static_url_path="/static"
 )
  
