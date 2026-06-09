@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Emergency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/medical.css') }}">
+</head>
+<body>
+<div class="wrapper">
+ 
+  <div class="hotline-bar">
+    <div class="hotline-label">🚨 Emergency Hotlines</div>
+    <div class="hotline-numbers">
+      <a class="hotline-item" href="tel:999"><i class="fa-solid fa-phone"></i> Ambulance <strong>999</strong></a>
+      <a class="hotline-item" href="tel:112"><i class="fa-solid fa-phone"></i> Emergency <strong>112</strong></a>
+      <a class="hotline-item" href="tel:0800720111"><i class="fa-solid fa-phone"></i> Kenya Red Cross <strong>0800 720 111</strong></a>
+    </div>
+  </div>
+ 
+  <header>
+    <div class="header-left">
+      <a href="{{ url_for('dashboard') }}" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+      <div class="page-badge"><div class="badge-dot"></div><span style="color:var(--accent);">Medical</span> Emergency</div>
+    </div>
+    <div class="alert-sent-pill"><i class="fa-solid fa-circle-check"></i> ALERT SENT TO RESPONDERS</div>
+  </header>
+ 
+  <main>
+    <div class="page-title">
+      <div class="page-title-sub">// First Aid Protocol</div>
+      <h1>MEDICAL <span>RESPONSE</span></h1>
+      <p>Follow these guidelines while waiting for emergency services. SHELL is here to help — tap the button below.</p>
+    </div>
+ 
+    <div class="guide-grid">
+      <div class="guide-card" style="animation-delay:0.1s">
+        <div class="guide-card-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+        <h3>CPR Protocol</h3>
+        <ul>
+          <li><span class="step-number">1</span> Check for response — tap shoulders, shout.</li>
+          <li><span class="step-number">2</span> Call for help. Lay on firm flat surface.</li>
+          <li><span class="step-number">3</span> Push hard & fast — centre of chest.</li>
+          <li><span class="step-number">4</span> 100–120 compressions per minute.</li>
+          <li><span class="step-number">5</span> Allow chest to fully recoil.</li>
+        </ul>
+        <i class="fa-solid fa-heart-pulse card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.15s">
+        <div class="guide-card-icon"><i class="fa-solid fa-droplet"></i></div>
+        <h3>Severe Bleeding</h3>
+        <ul>
+          <li><strong>Pressure:</strong> Apply firm direct pressure with clean cloth.</li>
+          <li><strong>Elevate:</strong> Raise the limb above heart level.</li>
+          <li><strong>Don't remove:</strong> Add more cloth if it soaks through.</li>
+          <li><strong>Tourniquet:</strong> Only if bleeding is life-threatening.</li>
+        </ul>
+        <i class="fa-solid fa-droplet card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.2s">
+        <div class="guide-card-icon"><i class="fa-solid fa-fire-extinguisher"></i></div>
+        <h3>Burns</h3>
+        <ul>
+          <li><strong>1st Degree:</strong> Cool water for 20 mins. No ice.</li>
+          <li><strong>2nd Degree:</strong> Do not pop blisters. Cover loosely.</li>
+          <li><strong>3rd Degree:</strong> Call 999. Do not remove clothing.</li>
+          <li><strong>Chemical:</strong> Flush with water for at least 20 mins.</li>
+        </ul>
+        <i class="fa-solid fa-fire-extinguisher card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.25s">
+        <div class="guide-card-icon"><i class="fa-solid fa-bed-pulse"></i></div>
+        <h3>Unconscious Person</h3>
+        <ul>
+          <li><strong>Check:</strong> Tap shoulders and shout their name.</li>
+          <li><strong>Breathing:</strong> Look, listen and feel for breath.</li>
+          <li><strong>Recovery:</strong> If breathing — recovery position.</li>
+          <li><strong>CPR:</strong> If not breathing — start CPR immediately.</li>
+        </ul>
+        <i class="fa-solid fa-bed-pulse card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.3s">
+        <div class="guide-card-icon"><i class="fa-solid fa-lungs"></i></div>
+        <h3>Choking</h3>
+        <ul>
+          <li><strong>Ask:</strong> "Are you choking?" — if yes, act fast.</li>
+          <li><strong>5 Back Blows:</strong> Firm blows between shoulder blades.</li>
+          <li><strong>5 Abdominal Thrusts:</strong> Heimlich maneuver.</li>
+          <li><strong>Repeat:</strong> Alternate until object dislodges.</li>
+        </ul>
+        <i class="fa-solid fa-lungs card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.35s">
+        <div class="guide-card-icon"><i class="fa-solid fa-bolt"></i></div>
+        <h3>Seizure</h3>
+        <ul>
+          <li><strong>Don't restrain:</strong> Never hold the person down.</li>
+          <li><strong>Clear area:</strong> Remove hard or sharp objects nearby.</li>
+          <li><strong>Cushion head:</strong> Place something soft under head.</li>
+          <li><strong>Call 999:</strong> If seizure exceeds 5 minutes.</li>
+        </ul>
+        <i class="fa-solid fa-bolt card-bg-icon"></i>
+      </div>
+    </div>
+  </main>
+ 
+  <footer>
+    <span>EMERGENCY RESPONSE SYSTEM v2.0</span>
+    <span>MEDICAL PROTOCOL</span>
+  </footer>
+</div>
+ 
+<!-- SHELL FLOATING WIDGET (UPDATED MIC – LONGER LISTENING) -->
+<div class="shell-trigger" id="shellTrigger" onclick="toggleShell()">
+  <div class="shell-badge" id="shellBadge">1</div>
+  <div class="shell-name">SHELL</div>
+  <div class="shell-sub">TAP TO CHAT</div>
+</div>
+ 
+<div class="shell-window" id="shellWindow">
+  <div class="shell-win-header">
+    <div class="shell-avatar">SH</div>
+    <div class="shell-win-info">
+      <div class="shell-win-name">SHELL</div>
+      <div class="shell-win-status">● ONLINE — Medical Assistant</div>
+    </div>
+    <button class="shell-win-close" onclick="toggleShell()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+ 
+  <div class="shell-messages" id="shellMessages"></div>
+ 
+  <div class="shell-input-row">
+    <button class="shell-mic" id="shellMic" onclick="requestMicAndStart()" title="Speak to SHELL">
+      <i class="fa-solid fa-microphone" id="shellMicIcon"></i>
+    </button>
+    <input class="shell-input" id="shellInput" type="text" placeholder="Type or speak your emergency…"/>
+    <button class="shell-send" onclick="sendToShell()"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+ 
+  <div class="shell-footer">POWERED BY SHELL — BY MICHELL</div>
+</div>
+ 
+<script>
+  // ── SHELL state ──
+  let shellOpen = false;
+  let recognition = null;
+  let listening = false;
+  let mediaStream = null;
+  let silenceTimer = null;
+  let accumulatedTranscript = "";
+  let micRetryCount = 0;
+  const MAX_MIC_RETRIES = 2;
+  const SILENCE_DELAY_MS = 2000;   // Wait 2 seconds of silence before sending
+  const OPENING_MSG = "Hi there! I'm <strong>SHELL</strong>, your medical emergency assistant. 👋<br><br>Describe the patient's condition and I'll walk you through exactly what to do. You can type or tap the 🎤 mic to speak.";
+ 
+  function getTime() {
+    return new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  }
+ 
+  function appendMsg(text, type) {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = `sh-msg ${type}`;
+    const isBot = type === 'bot';
+    div.innerHTML = `
+      <div class="sh-msg-av">${isBot ? 'SH' : '<i class="fa-solid fa-user"></i>'}</div>
+      <div>
+        <div class="sh-msg-bubble">${text}</div>
+        <div class="sh-msg-time">${getTime()}</div>
+      </div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+ 
+  function showTyping() {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = 'sh-msg bot';
+    div.id = 'sh-typing';
+    div.innerHTML = `<div class="sh-msg-av">SH</div><div class="sh-msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+ 
+  function removeTyping() {
+    const t = document.getElementById('sh-typing');
+    if (t) t.remove();
+  }
+ 
+  function sendToShell(textOverride) {
+    const inputEl = document.getElementById('shellInput');
+    const msg = textOverride || inputEl.value.trim();
+    if (!msg) return;
+    appendMsg(msg, 'user');
+    inputEl.value = '';
+    showTyping();
+    fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    })
+    .then(r => r.json())
+    .then(data => {
+      removeTyping();
+      appendMsg(data.response || 'Please call <strong>999</strong> immediately.', 'bot');
+    })
+    .catch(() => {
+      removeTyping();
+      appendMsg('Network error. Please call <strong>999</strong> immediately.', 'bot');
+    });
+  }
+ 
+  document.getElementById('shellInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendToShell();
+  });
+ 
+  function toggleShell() {
+    shellOpen = !shellOpen;
+    document.getElementById('shellWindow').classList.toggle('open', shellOpen);
+    if (shellOpen) {
+      const badge = document.getElementById('shellBadge');
+      if (badge) badge.remove();
+      const msgsEl = document.getElementById('shellMessages');
+      if (msgsEl.children.length === 0) appendMsg(OPENING_MSG, 'bot');
+      setTimeout(() => document.getElementById('shellInput').focus(), 350);
+    }
+  }
+ 
+  // ── MICROPHONE WITH MANUAL SILENCE DETECTION (LONGER LISTENING) ──
+  function requestMicAndStart() {
+    micRetryCount = 0;
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      appendMsg("Voice input not supported. Please use Chrome or Edge.", 'bot');
+      return;
+    }
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (!isLocal && location.protocol !== 'https:') {
+      appendMsg("Microphone requires HTTPS or localhost.", 'bot');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaStream = stream;
+        startContinuousRecognition();
+      })
+      .catch(err => {
+        let msg = "Microphone error: " + (err.name === 'NotAllowedError' ? "Permission denied." : err.message);
+        appendMsg(msg, 'bot');
+      });
+  }
+ 
+  function startContinuousRecognition() {
+    if (listening && recognition) {
+      recognition.stop();
+      return;
+    }
+    accumulatedTranscript = "";
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;          // Keep listening for multiple phrases
+    recognition.interimResults = true;      // Get results as you speak
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+    
+    recognition.onstart = () => {
+      listening = true;
+      document.getElementById('shellMic').classList.add('listening');
+      document.getElementById('shellMicIcon').className = 'fa-solid fa-stop';
+      appendMsg("🎤 Listening... (speak freely, I'll wait for 2 seconds of silence)", 'bot');
+    };
+    
+    recognition.onresult = (event) => {
+      // Clear any pending silence timer (user is still speaking)
+      if (silenceTimer) clearTimeout(silenceTimer);
+      
+      // Build the full transcript from all results
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript + " ";
+        }
+      }
+      accumulatedTranscript += final;
+      
+      // Set a timer to send the final transcript after silence
+      silenceTimer = setTimeout(() => {
+        if (accumulatedTranscript.trim().length > 0) {
+          const finalText = accumulatedTranscript.trim();
+          document.getElementById('shellInput').value = finalText;
+          sendToShell(finalText);
+          accumulatedTranscript = "";
+        } else {
+          appendMsg("No speech detected. Try speaking again.", 'bot');
+        }
+        // Stop recognition after sending
+        if (recognition) recognition.stop();
+      }, SILENCE_DELAY_MS);
+    };
+    
+    recognition.onerror = (event) => {
+      console.error("Speech error", event.error);
+      if (event.error === 'network' && micRetryCount < MAX_MIC_RETRIES) {
+        micRetryCount++;
+        appendMsg(`Connection issue. Retrying... (${micRetryCount}/${MAX_MIC_RETRIES})`, 'bot');
+        setTimeout(() => {
+          if (recognition) recognition.start();
+        }, 1000);
+        return;
+      }
+      let msg = "Voice error: ";
+      if (event.error === 'network') msg += "Check internet connection.";
+      else if (event.error === 'no-speech') msg += "No speech detected.";
+      else msg += event.error;
+      appendMsg(msg, 'bot');
+      stopMicUI();
+    };
+    
+    recognition.onend = () => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      stopMicUI();
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+    };
+    
+    recognition.start();
+  }
+ 
+  function stopMicUI() {
+    listening = false;
+    const micBtn = document.getElementById('shellMic');
+    micBtn.classList.remove('listening');
+    document.getElementById('shellMicIcon').className = 'fa-solid fa-microphone';
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+      recognition = null;
+    }
+  }
+ 
+  // Auto-open badge animation
+  setTimeout(() => {
+    const badge = document.getElementById('shellBadge');
+    if (badge && !shellOpen) {
+      badge.style.animation = 'badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
+    }
+  }, 3000);
+</script>
+</body>
+</html>

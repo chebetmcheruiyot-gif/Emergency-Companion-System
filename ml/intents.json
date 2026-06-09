@@ -1,0 +1,439 @@
+{
+  "intents": [
+
+    {
+      "tag": "greeting", 
+      "patterns": 
+      [ 
+        "Hi", "Hello", "Hey", "Good morning",
+        "Good afternoon", "Good evening", 
+        "Is anyone there?", "Can you help me?", 
+        "Hello there", "Hey there", "Hi assistant",
+        "Greetings", "Hi there", "Hello assistant",
+        "Hey assistant", "Anyone online?", "Are you there?",
+        "Can you assist me?", "Need help", 
+        "Hello, I need assistance", "Hi, are you available?",
+        "Hey, I need help", "Hello, can you respond?", "Hi bot", 
+        "Hey bot", "Hello support", "Hi support", "Hey support", 
+        "Hello emergency assistant", "Hi emergency assistant", 
+        "Good day", "Nice to meet you", "Hi, I have a question",
+        "Hello, I need help", "Hey, can you help?", "Hello, anyone here?",
+        "Hi, are you working?", "Assistant, hello", "Hi system", 
+        "Hello system", "Can you hear me?", "Hello, respond please", 
+        "Hi there assistant", "Hey, is this the assistant?",
+        "Hello, I am here", "Hi, checking connection", 
+        "Hello, please help", "Hey, quick help",
+        "Hi, support needed", "Hello help bot"
+   ],
+       "responses":
+         [ 
+          "Hello! How can I assist you today?", 
+          "Hi there. Are you safe right now?", 
+          "Hello. I'm here to help you in any emergency.",
+          "Hi. Tell me what is happening.",
+          "Greetings. How can I support you?", 
+          "Hello. If this is an emergency, stay calm and explain.", 
+          "Hi! I'm ready to help.", "Hello. What seems to be the problem?",
+          "Hi there. You are not alone — I am here to assist.",
+            "Hello! How may I help you today?"
+               ]
+             },
+     {"tag": "medical_unconscious",
+      "patterns": [
+        "Someone fainted",
+        "He fainted",
+        "She fainted",
+        "My mother just collapsed",
+        "My father fell down suddenly",
+        "He is unconscious",
+        "She is not responding",
+        "He blacked out",
+        "She just passed out",
+        "He suddenly fell and is not waking up",
+        "She is lying on the floor not moving",
+        "My brother collapsed in the house",
+        "My sister fainted in school",
+        "He won't respond when I call him",
+        "She is breathing but unconscious",
+        "He lost consciousness",
+        "Sudden blackout",
+        "She fainted after standing up",
+        "He collapsed in the bathroom",
+        "She is not reacting",
+        "He looks unconscious",
+        "She just dropped down",
+        "My dad suddenly collapsed",
+        "My mum is unconscious",
+        "He is not waking up",
+        "She fainted at work",
+        "He is dizzy and collapsed",
+        "She fainted in the kitchen",
+        "He suddenly passed out",
+        "She fell and is not talking",
+        "Someone just blacked out",
+        "He collapsed outside",
+        "She lost consciousness suddenly",
+        "My uncle fainted",
+        "He is lying down and not responding",
+        "She seems unconscious",
+        "He suddenly stopped responding",
+        "She passed out in front of me"
+      ],
+      "responses": [
+        "Check if the person is breathing.",
+        "If breathing, lay them on their side.",
+        "Loosen tight clothing.",
+        "Call emergency services immediately if not breathing."
+      ]
+    },
+
+    {
+      "tag": "medical_chest_pain",
+      "patterns": [
+        "Severe chest pain",
+        "He has chest pain",
+        "She is holding her chest",
+        "I think it's a heart attack",
+        "He is sweating and holding his chest",
+        "Chest pressure",
+        "Tightness in chest",
+        "Pain spreading to left arm",
+        "Pain spreading to jaw",
+        "He says his chest feels tight",
+        "Strong pain in upper body",
+        "He is gasping and clutching chest",
+        "Sudden chest discomfort",
+        "Heavy feeling in chest",
+        "Sharp pain in chest",
+        "Burning chest pain",
+        "He cannot breathe properly",
+        "She is struggling to breathe with chest pain",
+        "Chest pain and dizziness",
+        "Chest pain and sweating",
+        "Crushing chest pain",
+        "Possible heart attack",
+        "Severe pressure in chest",
+        "Chest pain after exercise",
+        "Pain in chest and arm",
+        "He looks pale and has chest pain",
+        "She is complaining of chest pain",
+        "Pain in upper chest area",
+        "He says his heart hurts",
+        "Sudden heart pain",
+        "Chest pain and nausea",
+        "Chest pain and shortness of breath",
+        "Intense chest pain",
+        "He is clutching his chest"
+      ],
+      "responses": [
+        "Help them sit down and stay calm.",
+        "Loosen tight clothing.",
+        "Call emergency services immediately.",
+        "If available and prescribed, assist with their heart medication."
+      ]
+    },
+
+    {
+      "tag": "medical_bleeding",
+      "patterns": [
+        "Severe bleeding",
+        "He is bleeding a lot",
+        "She has deep cut",
+        "Blood is pouring out",
+        "Heavy bleeding",
+        "He cut himself badly",
+        "She is losing blood",
+        "Bleeding won't stop",
+        "Deep wound bleeding",
+        "Accident with bleeding",
+        "Blood everywhere",
+        "Serious cut injury",
+        "Bleeding from leg",
+        "Bleeding from arm",
+        "Bleeding from head",
+        "Knife injury bleeding",
+        "Glass cut bleeding",
+        "Profuse bleeding",
+        "Large wound bleeding",
+        "Bleeding badly",
+        "He is bleeding heavily",
+        "She has serious wound",
+        "Open wound with blood",
+        "Bleeding after accident",
+        "Blood flowing continuously",
+        "Uncontrolled bleeding",
+        "Cut and bleeding",
+        "Severe injury with blood",
+        "He is covered in blood",
+        "She is bleeding fast"
+      ],
+      "responses": [
+        "Apply firm pressure to the wound using a clean cloth.",
+        "Raise the injured area if possible.",
+        "Keep applying pressure.",
+        "Call emergency services immediately."
+      ]
+    },
+
+    {
+      "tag": "medical_seizure",
+      "patterns": [
+        "Someone is having a seizure",
+        "He is shaking uncontrollably",
+        "She is convulsing",
+        "Epileptic attack",
+        "Body jerking",
+        "Sudden shaking",
+        "Foaming at the mouth",
+        "Seizure happening now",
+        "Uncontrolled body movements",
+        "He fell and started shaking",
+        "She is twitching on the ground",
+        "He is having fits",
+        "Convulsions",
+        "Seizure episode",
+        "Muscle spasms",
+        "He is shaking and not responding",
+        "She is having epilepsy attack",
+        "Sudden violent shaking",
+        "He collapsed and started convulsing",
+        "Seizure emergency"
+      ],
+      "responses": [
+        "Do not restrain the person.",
+        "Clear nearby objects.",
+        "Place something soft under their head.",
+        "Call emergency services if seizure lasts more than 5 minutes."
+      ]
+    },
+{
+      "tag": "house_fire",
+      "patterns": [
+        "House on fire","Room burning","Kitchen fire",
+        "Building on fire","Smoke in the house"
+      ],
+      "responses": [
+        "Evacuate immediately.",
+        "Stay low to avoid smoke.",
+        "Do not use elevators.",
+        "Call the fire department.",
+        "Do not re-enter the building."
+      ]
+    },
+
+    {
+      "tag": "electrical_fire",
+      "patterns": [
+        "Electrical fire","Socket on fire","Short circuit fire",
+        "Burning wires","Appliance caught fire"
+      ],
+      "responses": [
+        "Do not use water.",
+        "Switch off power supply if safe.",
+        "Use proper fire extinguisher.",
+        "Call fire emergency services."
+      ]
+    },
+
+    {
+      "tag": "gas_fire",
+      "patterns": [
+        "Gas fire","Gas explosion","Cooking gas fire",
+        "LPG burning","Gas cylinder on fire"
+      ],
+      "responses": [
+        "Evacuate immediately.",
+        "Do not turn electrical switches on or off.",
+        "Move far from the area.",
+        "Call emergency services."
+      ]
+    },
+
+    {
+      "tag": "wildfire",
+      "patterns": [
+        "Forest fire","Bush fire","Wildfire nearby",
+        "Grass fire spreading"
+      ],
+      "responses": [
+        "Move away from the fire direction.",
+        "Follow evacuation instructions.",
+        "Avoid heavy smoke areas.",
+        "Contact fire emergency services."
+      ]
+    },
+
+    {
+      "tag": "robbery",
+      "patterns": [
+        "Robbery in progress","Someone stealing",
+        "Armed robbery","Shop being robbed"
+      ],
+      "responses": [
+        "Do not confront the suspect.",
+        "Move to a safe place.",
+        "Call the police immediately."
+      ]
+    },
+
+    {
+      "tag": "assault",
+      "patterns": [
+        "Someone attacking","Physical fight",
+        "Domestic violence","Violent incident"
+      ],
+      "responses": [
+        "Move to a safe location.",
+        "Avoid confrontation.",
+        "Call police emergency services."
+      ]
+    },
+
+    {
+      "tag": "intruder",
+      "patterns": [
+        "Intruder in my house","Break in happening",
+        "Someone broke into my home"
+      ],
+      "responses": [
+        "Lock yourself in a secure room.",
+        "Stay quiet.",
+        "Call the police immediately."
+      ]
+    },
+
+    {
+      "tag": "armed_threat",
+      "patterns": [
+        "Gun threat","Knife threat",
+        "Someone has a weapon"
+      ],
+      "responses": [
+        "Move to cover immediately.",
+        "Avoid sudden movements.",
+        "Call police emergency services."
+      ]
+    },
+
+    
+
+    {
+      "tag": "road_accident",
+      "patterns": [
+        "Car accident",
+        "Road accident happened",
+        "Vehicle crash",
+        "Motorbike accident",
+        "Truck accident",
+        "Two cars collided",
+        "Someone hit by car",
+        "Pedestrian accident",
+        "Serious road crash",
+        "Traffic accident",
+        "Head on collision",
+        "Car flipped over",
+        "Accident on highway",
+        "Hit and run",
+        "Bus accident",
+        "People injured in crash",
+        "Major collision",
+        "Accident with injuries",
+        "Crash just happened",
+        "Vehicle rollover"
+      ],
+      "responses": [
+        "Check if anyone is injured.",
+        "Do not move injured persons unless necessary.",
+        "Call emergency services immediately.",
+        "Turn on hazard lights."
+      ]
+    },
+    { "tag": "distress", "patterns": [ "I am scared", 
+    "I feel unsafe", 
+    "Please help me", 
+    "I am in danger", "I am trapped", 
+    "I don't feel safe", "Something is wrong", 
+    "I need help now", "I am panicking", 
+    "Help me please", "I am terrified", 
+    "I feel threatened", "I am worried",
+     "I need urgent help", "I am anxious", 
+     "I am stuck", "I am alone and scared",
+      "I feel in danger", "I am in trouble", 
+      "Emergency help please", "I am not safe", 
+      "I am distressed", "I am frightened", 
+      "I need assistance immediately", 
+      "Please respond quickly", "I am under stress",
+       "I feel helpless", "I am overwhelmed", "I need support now", 
+       "Urgent help needed", "I am in a risky situation", 
+       "I am shaking", "I cannot stay calm", "I need someone to help", 
+       "I am very scared right now", "Help me urgently",
+        "I feel threatened right now", "I am in an unsafe place", 
+        "I need emergency assistance", "Please assist me quickly", 
+        "I am in a crisis", "Something bad is happening", 
+        "I am in immediate danger", "I am panicking badly",
+         "Help, I am scared", "I need protection", "I feel unsafe right now", 
+         "Emergency distress", "I need help urgently", "Serious distress situation" ], 
+         
+         "responses":
+          [ "Stay calm. Help is on the way.",
+           "You are not alone. Take deep breaths.", 
+           "Try to move to a safe location.", 
+           "I'm here with you. Tell me what is happening.", 
+           "Focus on staying calm and aware of your surroundings.",
+            "Help is available. Stay strong.", 
+            "Take slow, deep breaths to reduce panic.", 
+            "Find someone nearby who can assist you.", 
+            "You are safe. Keep communicating.", "Emergency support is being arranged." 
+            ] 
+          },
+        {
+  "tag": "goodbye",
+  "patterns": [
+    "Bye", "Goodbye", "Thank you", "Thanks", "See you", "That is all", 
+    "I am safe now", "Appreciate it", "Okay bye", "Talk later", "Thanks for the help",
+    "Bye assistant", "Goodbye assistant", "See you later", "Thanks a lot", 
+    "Much appreciated", "I am okay now", "Everything is fine now", "Signing off", 
+    "End chat", "No more help needed", "All good now", "Thanks for assistance", 
+    "I am safe", "Situation resolved", "Thanks goodbye", "Okay thank you",
+    "Thanks for support", "Goodbye and thanks", "Chat ended", "Bye for now", 
+    "Take care", "Thanks for your help", "Appreciate your assistance", 
+    "That helped a lot", "I am done", "Closing chat", "All set now", 
+    "Problem solved", "Thanks I am fine", "Okay I am safe now",
+    "Goodbye for now", "Thanks assistant", "Ending conversation",
+    "No further help needed", "Thanks, that is enough", "Bye and stay safe",
+    "See you next time", "Over and out", "Conversation finished",
+    "thank you", "thanks", "thank you so much", "thanks a lot", "appreciate it",
+    "okay thank you", "alright thanks", "got it thanks"
+  ],
+  "responses": [
+    "Stay safe. Goodbye!", 
+    "Take care and stay safe.", 
+    "Goodbye. I'm here if you need help again.", 
+    "Stay alert and protect yourself.", 
+    "Farewell. Remember, help is always available.",
+    "Goodbye. Stay safe and well.", 
+    "Take care. Do not hesitate to reach out again.", 
+    "Bye for now. Stay safe.", 
+    "Wishing you safety and peace.", 
+    "Goodbye. Stay prepared and safe."
+  ]
+},
+                
+              { "tag": "others",
+               "patterns": [], 
+               "responses":
+                [ "Stay calm. Help is on the way.", 
+                "I may not understand, but your safety matters.", 
+                "Please remain calm and seek assistance nearby.", 
+                "If this is an emergency, contact local emergency services.", 
+                "You are not alone. Try to reach someone for help.", 
+                "Stay safe and move to a secure location.", 
+                "Help is available. Please stay calm.", 
+                "Your safety is important. Seek immediate assistance.", 
+                "Try to stay calm while help arrives.", 
+                "Emergency support may be needed. Please act safely." 
+                ] 
+                } 
+                ] 
+              }
+  
