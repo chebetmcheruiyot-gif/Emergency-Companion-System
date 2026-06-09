@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Emergency Location</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg-deep:#060f08;--bg-dark:#091410;--bg-card:#0d1f14;
+      --green-main:#1e7a3e;--green-bright:#2ecc71;--green-glow:rgba(46,204,113,0.22);
+      --white:#f0f7f2;--white-dim:#8fada0;--red:#e63946;
+      --font-display:'Rajdhani',sans-serif;--font-mono:'Share Tech Mono',monospace;--font-body:'Barlow',sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;background:var(--bg-deep);color:var(--white);font-family:var(--font-body);overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(46,204,113,0.07) 1px,transparent 1px);background-size:30px 30px;pointer-events:none;z-index:0;}
+    .wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+ 
+    /* HEADER */
+    header{display:flex;align-items:center;justify-content:space-between;padding:15px 30px;border-bottom:1px solid rgba(46,204,113,0.1);background:rgba(6,15,8,0.92);backdrop-filter:blur(14px);position:sticky;top:0;z-index:100;animation:slideDown 0.5s ease both;}
+    @keyframes slideDown{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .header-left{display:flex;align-items:center;gap:14px;}
+    .back-btn{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10px;color:var(--white-dim);text-decoration:none;letter-spacing:2px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.08);padding:6px 14px;border-radius:20px;transition:all 0.2s;}
+    .back-btn:hover{border-color:var(--green-bright);color:var(--green-bright);}
+    .page-badge{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-size:16px;font-weight:700;letter-spacing:3px;text-transform:uppercase;}
+    .badge-dot{width:8px;height:8px;border-radius:50%;background:var(--green-bright);box-shadow:0 0 8px var(--green-bright);animation:blink 1.4s infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+    .live-pill{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10px;color:var(--red);border:1px solid rgba(230,57,70,0.3);padding:5px 13px;border-radius:20px;background:rgba(230,57,70,0.08);animation:live-flash 2s infinite;}
+    @keyframes live-flash{0%,100%{opacity:1;}50%{opacity:0.6;}}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red);animation:blink 1s infinite;}
+ 
+    /* MAIN LAYOUT */
+    main{flex:1;display:grid;grid-template-columns:320px 1fr;grid-template-rows:1fr;gap:0;height:calc(100vh - 60px);}
+ 
+    /* LEFT PANEL */
+    .left-panel{background:var(--bg-card);border-right:1px solid rgba(46,204,113,0.1);display:flex;flex-direction:column;overflow-y:auto;animation:fadeLeft 0.5s 0.2s ease both;}
+    @keyframes fadeLeft{from{transform:translateX(-20px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+    .panel-section{padding:20px 22px;border-bottom:1px solid rgba(46,204,113,0.08);}
+    .panel-section-title{font-family:var(--font-mono);font-size:9px;color:var(--white-dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .panel-section-title::after{content:'';flex:1;height:1px;background:rgba(46,204,113,0.1);}
+ 
+    .coord-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .coord-box{background:rgba(46,204,113,0.05);border:1px solid rgba(46,204,113,0.12);border-radius:10px;padding:12px 14px;}
+    .coord-label{font-family:var(--font-mono);font-size:8px;color:var(--white-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+    .coord-value{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--green-bright);letter-spacing:1px;}
+ 
+    .accuracy-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+    .accuracy-icon{color:var(--green-bright);font-size:12px;}
+    .accuracy-text{font-family:var(--font-mono);font-size:10px;color:var(--white-dim);}
+    .accuracy-text span{color:var(--green-bright);}
+ 
+    /* tracking update counter */
+    .update-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-family:var(--font-mono);font-size:10px;color:var(--white-dim);}
+    .update-row i{color:var(--green-bright);}
+    #update-count{color:var(--green-bright);font-weight:bold;}
+ 
+    .status-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:rgba(46,204,113,0.05);border:1px solid rgba(46,204,113,0.12);margin-bottom:10px;}
+    .status-icon{font-size:16px;}
+    .status-text{flex:1;}
+    .status-text strong{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--white);display:block;}
+    .status-text small{font-family:var(--font-mono);font-size:9px;color:var(--white-dim);letter-spacing:1px;}
+ 
+    .timestamp-row{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10px;color:var(--white-dim);}
+    .timestamp-row i{color:var(--green-bright);}
+    #live-clock{color:var(--green-bright);font-weight:bold;}
+ 
+    .action-btn{width:100%;padding:13px 16px;border-radius:11px;font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.22s;border:none;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;}
+    .btn-primary{background:linear-gradient(135deg,var(--green-main),var(--green-bright));color:#fff;box-shadow:0 4px 16px rgba(46,204,113,0.3);}
+    .btn-primary:hover{box-shadow:0 4px 24px rgba(46,204,113,0.5);transform:translateY(-1px);}
+    .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .btn-secondary{background:rgba(46,204,113,0.07);border:1px solid rgba(46,204,113,0.2);color:var(--green-bright);}
+    .btn-secondary:hover{background:rgba(46,204,113,0.14);border-color:var(--green-bright);}
+    .btn-danger{background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.25);color:var(--red);}
+    .btn-danger:hover{background:rgba(230,57,70,0.16);}
+ 
+    .history-list{display:flex;flex-direction:column;gap:8px;}
+    .history-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);font-size:11px;}
+    .history-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .history-text{flex:1;color:var(--white-dim);}
+    .history-text strong{color:var(--white);font-size:11px;}
+    .history-time{font-family:var(--font-mono);font-size:9px;color:var(--white-dim);}
+ 
+    /* MAP AREA */
+    .map-area{position:relative;display:flex;flex-direction:column;animation:fadeUp 0.5s 0.3s ease both;}
+    @keyframes fadeUp{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+ 
+    .map-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--bg-dark);}
+    .map-placeholder-icon{width:70px;height:70px;border-radius:50%;background:rgba(46,204,113,0.08);border:2px solid rgba(46,204,113,0.2);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--green-bright);animation:pin-pulse 2s ease-in-out infinite;}
+    @keyframes pin-pulse{0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,0.4);}50%{box-shadow:0 0 0 16px rgba(46,204,113,0);}}
+    .map-placeholder h3{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white);}
+    .map-placeholder p{font-family:var(--font-mono);font-size:11px;color:var(--white-dim);letter-spacing:2px;text-align:center;}
+ 
+    /* iframe — crossfade on src change to reduce flicker */
+    #map-frame{flex:1;width:100%;border:none;display:none;min-height:calc(100vh - 60px);transition:opacity 0.3s;}
+    #map-frame.loading{opacity:0;}
+ 
+    /* coords overlay */
+    .map-overlay{position:absolute;top:16px;left:16px;z-index:10;background:rgba(6,15,8,0.88);backdrop-filter:blur(10px);border:1px solid rgba(46,204,113,0.2);border-radius:12px;padding:10px 16px;display:none;}
+    .map-overlay-label{font-family:var(--font-mono);font-size:9px;color:var(--white-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+    .map-overlay-coords{font-family:var(--font-mono);font-size:11px;color:var(--green-bright);letter-spacing:1px;}
+ 
+    /* PULSING MARKER — centred over iframe */
+    .pulse-marker-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:20;display:none;flex-direction:column;align-items:center;gap:6px;pointer-events:none;}
+    .pulse-ring{position:absolute;border-radius:50%;border:2px solid rgba(46,204,113,0.5);animation:ring-grow 2.2s ease-out infinite;}
+    .pulse-ring:nth-child(1){width:60px;height:60px;animation-delay:0s;}
+    .pulse-ring:nth-child(2){width:90px;height:90px;animation-delay:0.7s;}
+    .pulse-ring:nth-child(3){width:120px;height:120px;animation-delay:1.4s;}
+    @keyframes ring-grow{0%{transform:scale(0.7);opacity:0.8;}100%{transform:scale(1.2);opacity:0;}}
+    .pulse-dot{position:relative;z-index:2;width:22px;height:22px;border-radius:50%;background:var(--green-bright);border:3px solid #fff;box-shadow:0 0 14px rgba(46,204,113,0.8);}
+    .pulse-label{position:relative;z-index:2;margin-top:70px;background:rgba(6,15,8,0.88);border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:5px 12px;font-family:var(--font-mono);font-size:10px;color:var(--green-bright);letter-spacing:1.5px;white-space:nowrap;}
+ 
+    /* TOAST */
+    .toast{position:fixed;bottom:26px;right:26px;background:var(--bg-card);border:1px solid var(--green-bright);border-radius:11px;padding:13px 18px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--white);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 20px var(--green-glow);z-index:999;transform:translateY(80px);opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.error{border-color:var(--red);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 20px rgba(230,57,70,0.2);}
+    .toast-icon{color:var(--green-bright);font-size:15px;}
+    .toast.error .toast-icon{color:var(--red);}
+ 
+    @media(max-width:768px){
+      main{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+      .left-panel{max-height:280px;overflow-y:auto;border-right:none;border-bottom:1px solid rgba(46,204,113,0.1);}
+      #map-frame{min-height:400px;}
+      header{padding:12px 16px;}
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+ 
+  <header>
+    <div class="header-left">
+      <a href="{{ url_for('dashboard') }}" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+      <div class="page-badge"><div class="badge-dot"></div><span style="color:var(--green-bright);">Live</span> Location</div>
+    </div>
+    <div class="live-pill"><div class="live-dot"></div> LIVE TRACKING</div>
+  </header>
+ 
+  <main>
+ 
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+ 
+      <div class="panel-section">
+        <div class="panel-section-title">GPS Coordinates</div>
+        <div class="coord-grid">
+          <div class="coord-box">
+            <div class="coord-label">Latitude</div>
+            <div class="coord-value" id="lat-display">—</div>
+          </div>
+          <div class="coord-box">
+            <div class="coord-label">Longitude</div>
+            <div class="coord-value" id="lng-display">—</div>
+          </div>
+        </div>
+        <div class="accuracy-row">
+          <i class="fa-solid fa-crosshairs accuracy-icon"></i>
+          <div class="accuracy-text">Accuracy: <span id="accuracy-display">Acquiring…</span></div>
+        </div>
+        <div class="update-row">
+          <i class="fa-solid fa-rotate"></i>
+          Position updates: <span id="update-count">0</span>
+        </div>
+      </div>
+ 
+      <div class="panel-section">
+        <div class="panel-section-title">Status</div>
+        <div class="status-row" id="status-row">
+          <div class="status-icon">⏳</div>
+          <div class="status-text">
+            <strong id="status-title">Acquiring Signal</strong>
+            <small id="status-sub">Waiting for GPS lock…</small>
+          </div>
+        </div>
+        <div class="timestamp-row">
+          <i class="fa-regular fa-clock"></i>
+          <span>Local time: <span id="live-clock">--:--:--</span></span>
+        </div>
+      </div>
+ 
+      <div class="panel-section">
+        <div class="panel-section-title">Actions</div>
+        <button class="action-btn btn-primary" id="share-btn" onclick="shareLocation()" disabled>
+          <i class="fa-solid fa-location-dot"></i> SHARE MY LOCATION
+        </button>
+        <button class="action-btn btn-secondary" id="watch-btn" onclick="toggleWatch()">
+          <i class="fa-solid fa-satellite-dish"></i> START LIVE TRACKING
+        </button>
+        <button class="action-btn btn-danger" onclick="window.location.href='{{ url_for('dashboard') }}'">
+          <i class="fa-solid fa-arrow-left"></i> BACK TO DASHBOARD
+        </button>
+      </div>
+ 
+      <div class="panel-section">
+        <div class="panel-section-title">Recent Location Shares</div>
+        <div class="history-list" id="history-list">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--white-dim);text-align:center;padding:10px 0;">No shares yet this session</div>
+        </div>
+      </div>
+ 
+    </div>
+ 
+    <!-- MAP AREA -->
+    <div class="map-area" id="map-area">
+ 
+      <div class="map-placeholder" id="map-placeholder">
+        <div class="map-placeholder-icon"><i class="fa-solid fa-location-dot"></i></div>
+        <h3>Acquiring Location</h3>
+        <p>Please allow location access<br>when prompted by your browser</p>
+      </div>
+ 
+      <iframe id="map-frame" src="about:blank" allowfullscreen loading="lazy"></iframe>
+ 
+      <!-- Pulsing marker — always centred, map moves underneath -->
+      <div class="pulse-marker-wrap" id="pulse-marker">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-label" id="pulse-label">YOU ARE HERE</div>
+      </div>
+ 
+      <!-- Coords overlay top-left -->
+      <div class="map-overlay" id="map-overlay">
+        <div class="map-overlay-label">Your Position</div>
+        <div class="map-overlay-coords" id="overlay-coords">—</div>
+      </div>
+ 
+    </div>
+  </main>
+</div>
+ 
+<div class="toast" id="toast">
+  <i class="fa-solid fa-circle-check toast-icon" id="toast-icon"></i>
+  <span id="toast-msg">Location shared.</span>
+</div>
+ 
+<script>
+  let currentLat   = null;
+  let currentLng   = null;
+  let shareHistory = [];
+  let watchId      = null;       // watchPosition ID
+  let updateCount  = 0;
+  let lastMapUrl   = '';         // prevent redundant reloads if position barely changed
+  let isTracking   = false;
+ 
+  // Clock
+  function tick() {
+    document.getElementById('live-clock').textContent =
+      new Date().toLocaleTimeString('en-GB', { hour12: false });
+  }
+  tick(); setInterval(tick, 1000);
+ 
+  // Toast
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.toggle('error', isError);
+    document.getElementById('toast-icon').className = isError
+      ? 'fa-solid fa-triangle-exclamation toast-icon'
+      : 'fa-solid fa-circle-check toast-icon';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+ 
+  // Status
+  function setStatus(icon, title, sub) {
+    document.getElementById('status-row').querySelector('.status-icon').textContent = icon;
+    document.getElementById('status-title').textContent = title;
+    document.getElementById('status-sub').textContent   = sub;
+  }
+ 
+  // Update map iframe — only reload when position changes meaningfully (>5m)
+  function updateMap(lat, lng, force = false) {
+    const newUrl = `https://www.google.com/maps?q=${lat},${lng}&hl=en&z=18&output=embed`;
+ 
+    // Skip reload if URL is the same (position hasn't changed enough)
+    if (!force && newUrl === lastMapUrl) return;
+    lastMapUrl = newUrl;
+ 
+    const frame   = document.getElementById('map-frame');
+    const holder  = document.getElementById('map-placeholder');
+    const overlay = document.getElementById('map-overlay');
+    const marker  = document.getElementById('pulse-marker');
+ 
+    // Fade out, swap src, fade in — reduces flicker feeling
+    frame.classList.add('loading');
+    frame.src = newUrl;
+    frame.onload = () => frame.classList.remove('loading');
+ 
+    frame.style.display   = 'block';
+    holder.style.display  = 'none';
+    overlay.style.display = 'block';
+    marker.style.display  = 'flex';
+ 
+    document.getElementById('lat-display').textContent    = lat.toFixed(6);
+    document.getElementById('lng-display').textContent    = lng.toFixed(6);
+    document.getElementById('overlay-coords').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('pulse-label').textContent    = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }
+ 
+  // Called on every position update (both initial + watch)
+  function onPosition(pos) {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    const acc = pos.coords.accuracy;
+ 
+    currentLat = lat;
+    currentLng = lng;
+    updateCount++;
+ 
+    document.getElementById('accuracy-display').textContent = `±${Math.round(acc)}m`;
+    document.getElementById('update-count').textContent     = updateCount;
+    document.getElementById('share-btn').disabled = false;
+ 
+    updateMap(lat, lng);
+ 
+    if (updateCount === 1) {
+      // First fix
+      setStatus('✅', 'Location Acquired', 'GPS lock confirmed');
+      showToast('📍 GPS lock acquired!');
+    } else {
+      // Subsequent updates while tracking
+      setStatus('📡', 'Live Tracking', `Updated · ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`);
+    }
+  }
+ 
+  function onError(err) {
+    const msgs = { 1:'Location access denied', 2:'Position unavailable', 3:'Request timed out' };
+    const msg  = msgs[err.code] || 'Unknown error';
+    setStatus('❌', 'Location Error', msg);
+    document.getElementById('accuracy-display').textContent = 'Failed';
+    showToast(msg, true);
+  }
+ 
+  // Initial single fix on load
+  function getLocation() {
+    if (!navigator.geolocation) {
+      setStatus('❌', 'Not Supported', 'Geolocation is unavailable'); return;
+    }
+    navigator.geolocation.getCurrentPosition(onPosition, onError,
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  }
+ 
+  // Toggle live tracking (watchPosition)
+  function toggleWatch() {
+    const btn = document.getElementById('watch-btn');
+    if (!isTracking) {
+      // Start watching
+      watchId = navigator.geolocation.watchPosition(onPosition, onError,
+        { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 });
+      isTracking = true;
+      btn.innerHTML = '<i class="fa-solid fa-satellite-dish"></i> STOP LIVE TRACKING';
+      btn.style.background = 'rgba(230,57,70,0.1)';
+      btn.style.borderColor = 'rgba(230,57,70,0.3)';
+      btn.style.color = 'var(--red)';
+      setStatus('📡', 'Live Tracking Active', 'Map updates as you move');
+      showToast('🛰️ Live tracking started!');
+    } else {
+      // Stop watching
+      if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+      isTracking = false;
+      btn.innerHTML = '<i class="fa-solid fa-satellite-dish"></i> START LIVE TRACKING';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      setStatus('✅', 'Tracking Stopped', 'Last known position shown');
+      showToast('Live tracking stopped.');
+    }
+  }
+ 
+  // Share location → save to DB
+  function shareLocation() {
+    if (!currentLat || !currentLng) { showToast('No GPS fix yet.', true); return; }
+    const btn = document.getElementById('share-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SENDING…';
+    fetch('/save_location', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ latitude: currentLat, longitude: currentLng })
+    })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> SHARE MY LOCATION';
+      if (data.status === 'ok') {
+        showToast('✅ Location saved — responders can now see your position!');
+        addToHistory(currentLat, currentLng);
+        document.getElementById('pulse-label').textContent = '📡 SHARED';
+        setStatus('📡', 'Location Shared', `Saved · ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`);
+      } else {
+        showToast(data.msg || 'Something went wrong.', true);
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> SHARE MY LOCATION';
+      showToast('Network error. Location not saved.', true);
+    });
+  }
+ 
+  // History log
+  function addToHistory(lat, lng) {
+    const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    shareHistory.unshift({ lat, lng, time: now });
+    if (shareHistory.length > 5) shareHistory.pop();
+    const el = document.getElementById('history-list');
+    el.innerHTML = shareHistory.map(h => `
+      <div class="history-item">
+        <div class="history-dot" style="background:var(--green-bright);box-shadow:0 0 5px var(--green-bright);"></div>
+        <div class="history-text"><strong>${h.lat.toFixed(4)}, ${h.lng.toFixed(4)}</strong></div>
+        <div class="history-time">${h.time}</div>
+      </div>`).join('');
+  }
+ 
+  // Stop watching when user leaves the page
+  window.addEventListener('beforeunload', () => {
+    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+  });
+ 
+  // Auto start
+  window.onload = () => getLocation();
+</script>
+</body>
+</html>

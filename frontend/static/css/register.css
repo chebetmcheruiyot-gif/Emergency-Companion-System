@@ -1,0 +1,101 @@
+/* Zoom-out effect for entire hologram panel */
+.scaled {
+    transform: scale(0.72);
+    transform-origin: top center;
+    margin-top: 40px;
+}
+
+/* Prevent it from shifting left after scaling */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
+    height: 100vh;
+    overflow: hidden; 
+    margin: 0;
+    background: url("../images/register-bg.png") no-repeat center center/cover;
+}
+
+/* Futuristic glowing glass panel */
+.glass-panel {
+    position: relative;
+    width: 480px;                 /* slightly narrower */
+    padding: 25px 35px;
+    border-radius: 18px;
+
+    /* Core holographic glass look */
+    background: rgba(0, 30, 45, 0.45);
+    backdrop-filter: blur(12px);
+
+    /* Glow reduced & tighter */
+    box-shadow:
+        0 0 12px rgba(0, 255, 255, 0.35),
+        0 0 25px rgba(0, 255, 255, 0.18),
+        inset 0 0 8px rgba(0, 255, 255, 0.25);
+
+    border: 1px solid rgba(0, 255, 255, 0.25);
+}
+
+/* Form container */
+.form-container {
+    text-align: center;
+}
+
+.title {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #00faff;
+    text-shadow: 0 0 10px cyan;
+}
+
+/* Inputs */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    background: rgba(0, 255, 255, 0.08);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 10px;
+    color: #e0ffff;
+    font-size: 16px;
+    outline: none;
+    box-shadow: inset 0 0 12px rgba(0, 255, 255, 0.15);
+}
+
+input::placeholder {
+    color: #aaffff;
+}
+
+/* Button */
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background: linear-gradient(90deg, #00eaff, #0088ff);
+    border: none;
+    border-radius: 10px;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 15px #00d5ff;
+    transition: 0.25s ease;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 25px #00eaff, 0 0 60px #00eaff;
+    transform: translateY(-2px);
+}
+
+/* Login link */
+.login-link {
+    margin-top: 18px;
+    color: #bbffff;
+}
+
+.login-link a {
+    color: #00eaff;
+    text-decoration: none;
+    font-weight: bold;
+}

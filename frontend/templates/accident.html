@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accident Emergency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/accident.css') }}">
+  <style>.shell-window.open{display:flex!important;}</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="hotline-bar">
+    <div class="hotline-label">🚨 Emergency Hotlines</div>
+    <div class="hotline-numbers">
+      <a class="hotline-item" href="tel:999"><i class="fa-solid fa-phone"></i> Ambulance <strong>999</strong></a>
+      <a class="hotline-item" href="tel:112"><i class="fa-solid fa-phone"></i> Emergency <strong>112</strong></a>
+      <a class="hotline-item" href="tel:0800723456"><i class="fa-solid fa-phone"></i> Traffic Police <strong>0800 723 456</strong></a>
+    </div>
+  </div>
+  <header>
+    <div class="header-left">
+      <a href="{{ url_for('dashboard') }}" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+      <div class="page-badge"><div class="badge-dot"></div><span style="color:var(--accent);">Accident</span> Emergency</div>
+    </div>
+    <div class="alert-sent-pill"><i class="fa-solid fa-circle-check"></i> ALERT SENT TO RESPONDERS</div>
+  </header>
+  <main>
+    <div class="page-title">
+      <div class="page-title-sub">// Road Accident Protocol</div>
+      <h1>ACCIDENT <span>RESPONSE</span></h1>
+      <p>Select how many are injured for tailored instructions. SHELLY is available bottom-right.</p>
+    </div>
+    <div class="severity-section">
+      <div class="section-label">// How many people are injured?</div>
+      <div class="severity-tabs">
+        <div class="severity-tab active" onclick="setSeverity('solo')" id="tab-solo"><i class="fa-solid fa-user"></i><div><span>Just Me</span><span class="tab-sub">Self-involved</span></div></div>
+        <div class="severity-tab" onclick="setSeverity('few')" id="tab-few"><i class="fa-solid fa-user-group"></i><div><span>1 – 3 People</span><span class="tab-sub">Minor to moderate</span></div></div>
+        <div class="severity-tab" onclick="setSeverity('many')" id="tab-many"><i class="fa-solid fa-users"></i><div><span>Many People</span><span class="tab-sub">Mass casualty</span></div></div>
+      </div>
+    </div>
+    <div class="response-box" id="response-box"></div>
+ 
+    <!-- EVIDENCE CAPTURE (camera + manual fallback) -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;margin:24px 0;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#8fada0;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">// Scene Evidence</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+        <button id="captureBtn" onclick="captureAndUpload()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,rgba(249,199,79,0.15),rgba(249,199,79,0.25));color:#f9c74f;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;">
+          <i class="fa-solid fa-camera"></i> CAPTURE SCENE PHOTO
+        </button>
+        <label for="manualPhotoInput" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px dashed #f9c74f;background:rgba(249,199,79,0.05);color:#f9c74f;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
+          <i class="fa-solid fa-image"></i> CHOOSE PHOTO
+          <input type="file" id="manualPhotoInput" accept="image/*" style="display:none;" onchange="uploadManualPhoto(this)">
+        </label>
+      </div>
+      <div id="captureStatus" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#8fada0;margin-top:10px;letter-spacing:1px;min-height:16px;"></div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:14px;">// General Response Guidelines</div>
+    <div class="guide-grid">
+      <div class="guide-card" style="animation-delay:0.3s">
+        <div class="guide-card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3>Immediate Safety</h3>
+        <ul><li><strong>Stop vehicle:</strong> Turn off engine immediately.</li><li><strong>Hazard lights:</strong> Switch on right away.</li><li><strong>Move safe:</strong> Exit vehicle away from traffic.</li><li><strong>Warning triangle:</strong> Place 45m behind if available.</li></ul>
+        <i class="fa-solid fa-triangle-exclamation card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.35s">
+        <div class="guide-card-icon"><i class="fa-solid fa-kit-medical"></i></div>
+        <h3>Injured Persons</h3>
+        <ul><li><strong>Don't move:</strong> Avoid moving anyone with spinal injury.</li><li><strong>Bleeding:</strong> Firm pressure with clean cloth.</li><li><strong>Breathing:</strong> Check and keep airway clear.</li><li><strong>Unconscious:</strong> Recovery position if breathing.</li></ul>
+        <i class="fa-solid fa-kit-medical card-bg-icon"></i>
+      </div>
+      <div class="guide-card" style="animation-delay:0.4s">
+        <div class="guide-card-icon"><i class="fa-solid fa-camera"></i></div>
+        <h3>Document the Scene</h3>
+        <ul><li><strong>Photos:</strong> Capture damage, positions, road markings.</li><li><strong>Exchange info:</strong> Names, plates, insurance details.</li><li><strong>Witnesses:</strong> Names and contact numbers.</li><li><strong>Report:</strong> File police and insurance report.</li></ul>
+        <i class="fa-solid fa-camera card-bg-icon"></i>
+      </div>
+    </div>
+  </main>
+  <footer><span>EMERGENCY RESPONSE SYSTEM v2.0</span><span>ACCIDENT PROTOCOL</span></footer>
+</div>
+
+<!-- SHELLY FLOATING WIDGET -->
+<div class="shell-trigger" id="shellTrigger" onclick="toggleShell()">
+  <div class="shell-badge" id="shellBadge">1</div>
+  <div class="shell-name">SHELLY</div>
+  <div class="shell-sub">TAP TO CHAT</div>
+</div>
+
+<div class="shell-window" id="shellWindow">
+  <div class="shell-win-header">
+    <div class="shell-avatar">SH</div>
+    <div class="shell-win-info">
+      <div class="shell-win-name">SHELLY</div>
+      <div class="shell-win-status">● ONLINE — Accident Assistant</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button id="langToggleBtn" onclick="toggleLanguage()" title="Switch to Kiswahili" style="padding:4px 8px;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#8fada0;font-family:'Share Tech Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px;">🇬🇧 EN</button>
+      <button id="voiceModeBtn" onclick="toggleVoiceMode()" title="Voice mode OFF — tap to enable" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#8fada0;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <i class="fa-solid fa-volume-xmark" id="voiceModeIcon"></i>
+      </button>
+    </div>
+    <button class="shell-win-close" onclick="toggleShell()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="shell-messages" id="shellMessages"></div>
+  <div class="shell-input-row">
+    <button class="shell-mic" id="shellMic" onclick="requestMicAndStart()" title="Speak to SHELLY">
+      <i class="fa-solid fa-microphone" id="shellMicIcon"></i>
+    </button>
+    <input class="shell-input" id="shellInput" type="text" placeholder="Type or speak your emergency…"/>
+    <button class="shell-send" onclick="sendToShell()"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+  <div class="shell-footer">POWERED BY SHELLY — BY MICHELL</div>
+</div>
+
+<script>
+  // ======================== SEVERITY DATA & INIT ========================
+  const severityData={
+    solo:{icon:'fa-user',title:'Self-Involved — Steps to Follow',steps:[{bold:'Stay calm:',text:'Assess yourself for injuries before moving.'},{bold:'Turn off engine:',text:'Reduce fire risk immediately.'},{bold:'Switch on hazards:',text:'Warn other road users.'},{bold:'Exit safely:',text:'Move to the roadside away from traffic.'},{bold:'Call 999:',text:'Report the accident even if minor.'},{bold:'Document:',text:'Photos, location and time for insurance.'}]},
+    few:{icon:'fa-user-group',title:'1–3 Injured — Steps to Follow',steps:[{bold:'Call 999 immediately:',text:'State exact location and number of casualties.'},{bold:'Do not move casualties:',text:'Unless there is immediate danger.'},{bold:'Control bleeding:',text:'Apply firm pressure with clean cloth.'},{bold:'Check breathing:',text:'Recovery position if unconscious and breathing.'},{bold:'Keep them warm:',text:'Use jacket or blanket to prevent shock.'},{bold:'Secure the scene:',text:'Warning triangle, keep bystanders back.'}]},
+    many:{icon:'fa-users',title:'Mass Casualty — Steps to Follow',steps:[{bold:'Call 999 immediately:',text:'State "mass casualty incident" — give exact location.'},{bold:'Do not move anyone:',text:'Wait for trained responders.'},{bold:'Triage if trained:',text:'Prioritise — unconscious, not breathing first.'},{bold:'Control crowds:',text:'Keep bystanders back — preserve the scene.'},{bold:'Assign helpers:',text:'One bystander per casualty to monitor.'},{bold:'Stay on the line:',text:'Keep 999 connected — follow dispatcher instructions.'}]}
+  };
+  function setSeverity(type){
+    document.querySelectorAll('.severity-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+type).classList.add('active');
+    const d=severityData[type];
+    document.getElementById('response-box').innerHTML=`<h3><i class="fa-solid ${d.icon}"></i> ${d.title}</h3><div class="steps-list">${d.steps.map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text"><strong>${s.bold}</strong> ${s.text}</div></div>`).join('')}</div>`;
+  }
+  setSeverity('solo');
+
+  // ======================== STATE (no duplicates) ========================
+  let shellOpen = false;
+  let recognition = null;
+  let listening = false;
+  let mediaStream = null;
+  let silenceTimer = null;
+  let accumulatedTranscript = "";
+  let micRetryCount = 0;
+  const MAX_MIC_RETRIES = 2;
+  const SILENCE_DELAY_MS = 2000;
+  const OPENING_MSG = "Hi there! I'm <strong>SHELLY</strong>, accident emergency assistant. 🚗<br><br>Tell me what happened and how many people are injured — I'll guide you through exactly what to do. Type or tap the 🎤 mic to speak.";
+
+  let voiceMode = false;
+  let shellLang = 'en';
+  let ttsUtterance = null;
+  let cachedVoices = [];
+
+  // ======================== HELPER FUNCTIONS ========================
+  function getTime() {
+    return new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function appendMsg(text, type) {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = `sh-msg ${type}`;
+    const isBot = type === 'bot';
+    div.innerHTML = `<div class="sh-msg-av">${isBot ? 'SH' : '<i class="fa-solid fa-user"></i>'}</div><div><div class="sh-msg-bubble">${text}</div><div class="sh-msg-time">${getTime()}</div></div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgsEl = document.getElementById('shellMessages');
+    const div = document.createElement('div');
+    div.className = 'sh-msg bot';
+    div.id = 'sh-typing';
+    div.innerHTML = `<div class="sh-msg-av">SH</div><div class="sh-msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('sh-typing');
+    if (t) t.remove();
+  }
+
+  // ======================== SEND TO SHELLY (with TTS & language) ========================
+  function sendToShell(textOverride) {
+    const inputEl = document.getElementById('shellInput');
+    const msg = textOverride || inputEl.value.trim();
+    if (!msg) return;
+    appendMsg(msg, 'user');
+    inputEl.value = '';
+    showTyping();
+    fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, language: shellLang })
+    })
+    .then(r => r.json())
+    .then(data => {
+      removeTyping();
+      const reply = data.response || (shellLang === 'sw' ? 'Piga simu 999 mara moja.' : 'Please call <strong>999</strong> immediately.');
+      appendMsg(reply, 'bot');
+      speakResponse(reply);
+    })
+    .catch(() => {
+      removeTyping();
+      const err = shellLang === 'sw' ? 'Hitilafu ya mtandao. Piga simu <strong>999</strong>.' : 'Network error. Call <strong>999</strong>.';
+      appendMsg(err, 'bot');
+    });
+  }
+
+  // ======================== VOICE MODE (TTS) ========================
+  function loadVoices() {
+    const v = window.speechSynthesis.getVoices();
+    if (v.length) cachedVoices = v;
+  }
+  loadVoices();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function pickFemaleVoice(langCode) {
+    const voices = cachedVoices.length ? cachedVoices : window.speechSynthesis.getVoices();
+    const femaleKeywords = ['female','woman','girl','zira','samantha','victoria','karen','moira','tessa','fiona','susan','lisa','amy','emma','aria','jenny','michelle','monica','natasha','hazel','heera'];
+    const isFemale = v => femaleKeywords.some(k => v.name.toLowerCase().includes(k));
+    return voices.find(v => v.lang.startsWith(langCode) && isFemale(v) && v.localService)
+        || voices.find(v => v.lang.startsWith(langCode) && isFemale(v))
+        || voices.find(v => isFemale(v) && v.localService)
+        || voices.find(v => isFemale(v))
+        || voices.find(v => v.lang.startsWith(langCode))
+        || null;
+  }
+
+  function speakResponse(text) {
+    if (!voiceMode || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const plain = text.replace(/<[^>]*>/g, '').trim();
+    if (!plain) return;
+    const doSpeak = () => {
+      ttsUtterance = new SpeechSynthesisUtterance(plain);
+      ttsUtterance.lang = shellLang === 'sw' ? 'sw-KE' : 'en-GB';
+      ttsUtterance.rate = 0.92;
+      ttsUtterance.pitch = 1.1;
+      const voice = pickFemaleVoice(shellLang === 'sw' ? 'sw' : 'en');
+      if (voice) ttsUtterance.voice = voice;
+      window.speechSynthesis.speak(ttsUtterance);
+    };
+    if (cachedVoices.length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => { loadVoices(); doSpeak(); };
+      setTimeout(doSpeak, 500);
+    } else {
+      doSpeak();
+    }
+  }
+
+  // ======================== TOGGLE VOICE & LANGUAGE ========================
+  function toggleVoiceMode() {
+    voiceMode = !voiceMode;
+    const btn = document.getElementById('voiceModeBtn');
+    const icon = document.getElementById('voiceModeIcon');
+    if (voiceMode) {
+      btn.style.background = 'rgba(46,204,113,0.2)';
+      btn.style.borderColor = 'var(--green-bright)';
+      btn.style.color = 'var(--green-bright)';
+      icon.className = 'fa-solid fa-volume-high';
+      btn.title = 'Voice mode ON — tap to mute';
+      appendMsg('🔊 Voice mode ON — SHELLY will speak responses aloud.', 'bot');
+    } else {
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      icon.className = 'fa-solid fa-volume-xmark';
+      btn.title = 'Voice mode OFF — tap to enable';
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      appendMsg('🔇 Voice mode OFF.', 'bot');
+    }
+  }
+
+  function toggleLanguage() {
+    shellLang = shellLang === 'en' ? 'sw' : 'en';
+    const btn = document.getElementById('langToggleBtn');
+    if (shellLang === 'sw') {
+      btn.textContent = '🇰🇪 SW';
+      btn.title = 'Kiswahili — tap for English';
+      document.getElementById('shellInput').placeholder = 'Andika au sema hali yako ya dharura…';
+      appendMsg('🇰🇪 Nimebadilisha lugha kuwa <strong>Kiswahili</strong>. Niambie kinachoendelea.', 'bot');
+    } else {
+      btn.textContent = '🇬🇧 EN';
+      btn.title = 'English — tap for Kiswahili';
+      document.getElementById('shellInput').placeholder = 'Type or speak your emergency…';
+      appendMsg('🇬🇧 Switched to <strong>English</strong>. Tell me what\'s happening.', 'bot');
+    }
+    if (recognition) {
+      try { recognition.lang = shellLang === 'sw' ? 'sw-KE' : 'en-US'; } catch(e) {}
+    }
+  }
+
+  // ======================== MICROPHONE (continuous, 2s silence) ========================
+  function stopMicUI() {
+    listening = false;
+    const micBtn = document.getElementById('shellMic');
+    micBtn.classList.remove('listening');
+    document.getElementById('shellMicIcon').className = 'fa-solid fa-microphone';
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+      recognition = null;
+    }
+  }
+
+  function startContinuousRecognition() {
+    if (listening && recognition) {
+      recognition.stop();
+      return;
+    }
+    accumulatedTranscript = "";
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = shellLang === 'sw' ? 'sw-KE' : 'en-US';
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      listening = true;
+      document.getElementById('shellMic').classList.add('listening');
+      document.getElementById('shellMicIcon').className = 'fa-solid fa-stop';
+      appendMsg("🎤 Listening... (speak freely, I'll wait for 2 seconds of silence)", 'bot');
+    };
+
+    recognition.onresult = (event) => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript + " ";
+        }
+      }
+      accumulatedTranscript += final;
+      silenceTimer = setTimeout(() => {
+        if (accumulatedTranscript.trim().length > 0) {
+          const finalText = accumulatedTranscript.trim();
+          document.getElementById('shellInput').value = finalText;
+          sendToShell(finalText);
+          accumulatedTranscript = "";
+        } else {
+          appendMsg("No speech detected. Try speaking again.", 'bot');
+        }
+        if (recognition) recognition.stop();
+      }, SILENCE_DELAY_MS);
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === 'network' && micRetryCount < MAX_MIC_RETRIES) {
+        micRetryCount++;
+        appendMsg(`Connection issue. Retrying... (${micRetryCount}/${MAX_MIC_RETRIES})`, 'bot');
+        setTimeout(() => { if (recognition) recognition.start(); }, 1000);
+        return;
+      }
+      let msg = "Voice error: ";
+      if (event.error === 'network') msg += "Check internet connection.";
+      else if (event.error === 'no-speech') msg += "No speech detected.";
+      else msg += event.error;
+      appendMsg(msg, 'bot');
+      stopMicUI();
+    };
+
+    recognition.onend = () => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      stopMicUI();
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+    };
+    recognition.start();
+  }
+
+  function requestMicAndStart() {
+    micRetryCount = 0;
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      appendMsg("Voice input not supported. Please use Chrome or Edge.", 'bot');
+      return;
+    }
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (!isLocal && location.protocol !== 'https:') {
+      appendMsg("Microphone requires HTTPS or localhost.", 'bot');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaStream = stream;
+        startContinuousRecognition();
+      })
+      .catch(err => {
+        let msg = "Microphone error: " + (err.name === 'NotAllowedError' ? "Permission denied." : err.message);
+        appendMsg(msg, 'bot');
+      });
+  }
+
+  // ======================== CAMERA CAPTURE (fixed) ========================
+  function autoCapture() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { reject('no camera'); return; }
+      const video = document.createElement('video');
+      const canvas = document.createElement('canvas');
+      video.setAttribute('playsinline',''); video.setAttribute('muted','');
+      video.style.display = 'none';
+      document.body.appendChild(video);
+      navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment', width:{ideal:1280}, height:{ideal:720} } })
+        .then(stream => { video.srcObject = stream; return video.play(); })
+        .then(() => new Promise(res => setTimeout(res, 1500)))
+        .then(() => {
+          canvas.width = video.videoWidth || 1280;
+          canvas.height = video.videoHeight || 720;
+          canvas.getContext('2d').drawImage(video, 0, 0);
+          video.srcObject.getTracks().forEach(t => t.stop());  // fixed typo
+          document.body.removeChild(video);
+          canvas.toBlob(blob => { if(blob) resolve(blob); else reject('failed'); }, 'image/jpeg', 0.85);
+        })
+        .catch(err => { if(video.parentNode) document.body.removeChild(video); reject(err); });
+    });
+  }
+
+  function captureAndUpload() {
+    const statusEl = document.getElementById('captureStatus');
+    statusEl.textContent = '📸 Capturing scene photo...';
+    autoCapture()
+      .then(blob => {
+        statusEl.textContent = '⏳ Uploading evidence...';
+        const fd = new FormData();
+        fd.append('file', blob, 'evidence_capture.jpg');
+        return fetch('/upload_evidence', { method:'POST', body:fd });
+      })
+      .then(r => r.json())
+      .then(data => {
+        statusEl.style.color = '#2ecc71';
+        statusEl.textContent = data.status === 'ok' ? '✅ Evidence captured and uploaded.' : '⚠️ ' + data.msg;
+      })
+      .catch(err => {
+        statusEl.style.color = '#e63946';
+        statusEl.textContent = '⚠️ Camera not available. Use the "CHOOSE PHOTO" button instead.';
+      });
+  }
+
+  // Manual photo upload (fallback)
+  function uploadManualPhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('captureStatus');
+    statusEl.textContent = '⏳ Uploading selected photo...';
+    const fd = new FormData();
+    fd.append('file', file);
+    fetch('/upload_evidence', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(data => {
+        statusEl.style.color = '#2ecc71';
+        statusEl.textContent = data.status === 'ok' ? '✅ Photo uploaded.' : '⚠️ ' + data.msg;
+      })
+      .catch(() => {
+        statusEl.style.color = '#e63946';
+        statusEl.textContent = '❌ Upload failed.';
+      });
+  }
+
+  // ======================== SHELL WINDOW TOGGLE ========================
+  function toggleShell() {
+    shellOpen = !shellOpen;
+    const win = document.getElementById('shellWindow');
+    win.classList.toggle('open', shellOpen);
+    if (shellOpen) {
+      const badge = document.getElementById('shellBadge');
+      if (badge) badge.remove();
+      const msgsEl = document.getElementById('shellMessages');
+      if (msgsEl.children.length === 0) appendMsg(OPENING_MSG, 'bot');
+      setTimeout(() => document.getElementById('shellInput').focus(), 350);
+    }
+  }
+
+  // ======================== INPUT EVENT ========================
+  document.getElementById('shellInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendToShell();
+  });
+
+  // Animate badge on load
+  setTimeout(() => {
+    const badge = document.getElementById('shellBadge');
+    if (badge && !shellOpen) {
+      badge.style.animation = 'badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
+    }
+  }, 3000);
+</script>
+</body>
+</html>
