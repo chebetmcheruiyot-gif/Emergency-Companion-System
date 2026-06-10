@@ -763,4 +763,13 @@ def save_location():
     lat  = data.get("latitude")
     lng  = data.get("longitude")
     if not lat or not lng:
-        return jsonify({"status": "error", "msg":
+        return jsonify({"status": "error", "msg": "No coordinates provided"}), 400
+    db.session.add(Alert(
+        user_id    = session['user_id'],
+        alert_type = "location_share",
+        latitude   = str(lat),
+        longitude  = str(lng)
+    ))
+    db.session.commit()
+    total = Alert.query.filter_by(user_id=session['user_id']).count()
+    return jsonify({"status": "ok", "msg": "Location saved.", "total_alerts": total})
