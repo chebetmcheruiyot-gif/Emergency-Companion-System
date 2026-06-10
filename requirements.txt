@@ -7,4 +7,4 @@ python-dotenv==1.0.0
 requests==2.31.0
 gunicorn==21.2.0
 africastalking==1.2.0
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
