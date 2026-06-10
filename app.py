@@ -277,6 +277,7 @@ def login():
         flash("Invalid email or password!", "danger")
         return redirect(url_for("login"))
     return render_template("login.html")
+
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
