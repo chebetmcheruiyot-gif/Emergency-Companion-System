@@ -298,43 +298,47 @@ def admin_logout():
 @app.route('/admin/dashboard')
 @admin_required
 def admin_dashboard():
-    # Stats
     total_users  = User.query.count()
     total_alerts = Alert.query.count()
     today_start  = datetime.combine(date.today(), datetime.min.time())
     alerts_today = Alert.query.filter(Alert.timestamp >= today_start).count()
     unresolved   = Alert.query.filter(Alert.status != 'resolved').count()
- 
-    # Recent alerts with user info attached
-    raw_alerts = Alert.query.order_by(Alert.timestamp.desc()).limit(50).all()
+
+    raw_alerts = Alert.query.order_by(Alert.timestamp.desc()).all()
     users_map  = {u.id: u for u in User.query.all()}
- 
-    recent_alerts = []
+
+    # Used for both recent_alerts and all_alerts
+    enriched_alerts = []
     for a in raw_alerts:
         u = users_map.get(a.user_id)
         a.user_name     = u.fullname if u else 'Unknown'
         a.user_phone    = u.phone    if u else '-'
         a.user_initials = ''.join([p[0].upper() for p in (u.fullname.split()[:2] if u else ['?'])])
-        recent_alerts.append(a)
- 
-    # All users with alert counts and initials
-    all_users = []
+        # Build map link if coordinates exist
+        if a.latitude and a.longitude:
+            a.maps_url = f"https://maps.google.com/?q={a.latitude},{a.longitude}"
+        else:
+            a.maps_url = None
+        enriched_alerts.append(a)
+
+    # Users with alert counts and initials
+    users = []
     for u in User.query.all():
         u.alert_count = Alert.query.filter_by(user_id=u.id).count()
         u.initials    = ''.join([p[0].upper() for p in u.fullname.split()[:2]])
-        all_users.append(u)
- 
-    # Responder units
+        users.append(u)
+
     units = ResponderUnit.query.all()
- 
+
     return render_template(
         'admin_dashboard.html',
         total_users   = total_users,
         total_alerts  = total_alerts,
         alerts_today  = alerts_today,
         unresolved    = unresolved,
-        recent_alerts = recent_alerts,
-        all_users     = all_users,
+        recent_alerts = enriched_alerts[:10],   # dashboard overview — latest 10
+        all_alerts    = enriched_alerts,         # full alert log
+        users         = users,                   # registered users table
         units         = units,
         admin_name    = session.get('admin_name', 'Admin'),
         now           = datetime.now().strftime('%d %b %Y, %H:%M')
