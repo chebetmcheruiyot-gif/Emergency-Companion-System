@@ -277,6 +277,24 @@ def login():
         flash("Invalid email or password!", "danger")
         return redirect(url_for("login"))
     return render_template("login.html")
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        admin_user = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_pass = os.getenv('ADMIN_PASSWORD', 'emergency@admin2024')
+        if username == admin_user and password == admin_pass:
+            session['admin'] = True
+            return redirect(url_for('admin_dashboard'))
+        flash('Invalid admin credentials', 'danger')
+    return render_template('admin_login.html')
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    return render_template('admin_dashboard.html')
  
 @app.route("/logout", methods=["POST"])
 def logout():
