@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from functools import wraps
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import sys, os, threading
@@ -34,7 +34,6 @@ app.config["MAIL_USE_TLS"]                   = True
 app.config["MAIL_USERNAME"]                  = os.getenv("MAIL_USERNAME", "chebetmcheruiyot@gmail.com")
 app.config["MAIL_PASSWORD"]                  = os.getenv("MAIL_PASSWORD", "tedmheejkmifzgas")
 app.config["MAIL_DEFAULT_SENDER"]            = ("Emergency System", app.config["MAIL_USERNAME"])
-# FIXED: Upload folder path - now points correctly to frontend/static/uploads
 app.config["UPLOAD_FOLDER"]                  = os.path.join(os.path.dirname(__file__), "frontend", "static", "uploads")
 app.config["MAX_CONTENT_LENGTH"]             = 16 * 1024 * 1024  # 16MB max
  
@@ -47,7 +46,7 @@ db         = SQLAlchemy(app)
 mail       = Mail(app)
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
  
-# AFRICA'S TALKING 
+# AFRICA'S TALKING
 AT_USERNAME = os.getenv("AT_USERNAME", "sandbox")
 AT_API_KEY  = os.getenv("AT_API_KEY", "")
 AT_ENV      = os.getenv("AT_ENV", "sandbox")
@@ -75,12 +74,6 @@ ALERT_LABELS = {
 }
  
 def format_phone_ke(phone):
-    """
-    Normalize Kenyan phone numbers to international format.
-    07xxxxxxxx → +2547xxxxxxxx
-    2547xxxxxxxx → +2547xxxxxxxx
-    +2547xxxxxxxx → unchanged
-    """
     phone = str(phone).strip().replace(' ', '').replace('-', '')
     if phone.startswith('+'):
         return phone
@@ -91,10 +84,6 @@ def format_phone_ke(phone):
     return '+254' + phone
  
 def send_kin_sms(user, alert_type, latitude=None, longitude=None):
-    """
-    Sends an SMS to the user's next of kin in a background thread.
-    Uses relationship field to personalise message.
-    """
     if alert_type not in SMS_ALERT_TYPES:
         return
  
@@ -103,18 +92,14 @@ def send_kin_sms(user, alert_type, latitude=None, longitude=None):
             alert_label = ALERT_LABELS.get(alert_type, alert_type.upper())
             first_name = user.fullname.split()[0]
  
-            # Build location string
             if latitude and longitude:
                 maps_link = f"https://maps.google.com/?q={latitude},{longitude}"
                 location_line = f"Location: {maps_link}"
             else:
                 location_line = "Location: Not available"
  
-            # --- Intelligent relationship mapping ---
             relationship = (user.relationship or "family member").lower().strip()
-            
-            # Map common relationships to "your child"
-            if relationship in ['mother', 'father', 'mom', 'dad', 'mum', 'dad']:
+            if relationship in ['mother', 'father', 'mom', 'dad', 'mum']:
                 relation_display = "your child"
             else:
                 relation_display = f"your {relationship}"
@@ -129,11 +114,9 @@ def send_kin_sms(user, alert_type, latitude=None, longitude=None):
             )
  
             kin_phone = format_phone_ke(user.kin_phone)
- 
-            response = sms.send(message, [kin_phone])
- 
+            response  = sms.send(message, [kin_phone])
             recipient = response['SMSMessageData']['Recipients'][0]
-            status = recipient['status']
+            status    = recipient['status']
             status_code = recipient['statusCode']
  
             if status == 'UserInBlacklist':
@@ -144,12 +127,11 @@ def send_kin_sms(user, alert_type, latitude=None, longitude=None):
                 print(f"[SMS INFO] {kin_phone} - Status: {status} (Code: {status_code})")
  
         except KeyError as e:
-            print(f"[SMS ERROR] Unexpected response format: {e} - Full response: {response}")
+            print(f"[SMS ERROR] Unexpected response format: {e}")
         except Exception as e:
             print(f"[SMS ERROR] {e}")
  
-    thread = threading.Thread(target=_send, daemon=True)
-    thread.start()
+    threading.Thread(target=_send, daemon=True).start()
  
 # ============================
 # MODELS
@@ -166,15 +148,15 @@ class User(db.Model):
     password     = db.Column(db.String(200), nullable=False)
  
 class Alert(db.Model):
-    id            = db.Column(db.Integer, primary_key=True)
-    user_id       = db.Column(db.Integer, nullable=False)
-    alert_type    = db.Column(db.String(50), nullable=False)
-    latitude      = db.Column(db.String(50))
-    longitude     = db.Column(db.String(50))
-    status        = db.Column(db.String(20), default="pending")
-    dispatched_to = db.Column(db.String(50))
-    evidence_photo = db.Column(db.String(255))   # stores filename of uploaded evidence
-    timestamp     = db.Column(
+    id             = db.Column(db.Integer, primary_key=True)
+    user_id        = db.Column(db.Integer, nullable=False)
+    alert_type     = db.Column(db.String(50), nullable=False)
+    latitude       = db.Column(db.String(50))
+    longitude      = db.Column(db.String(50))
+    status         = db.Column(db.String(20), default="pending")
+    dispatched_to  = db.Column(db.String(50))
+    evidence_photo = db.Column(db.String(255))
+    timestamp      = db.Column(
         db.DateTime,
         default=lambda: datetime.utcnow() + timedelta(hours=3)
     )
@@ -191,14 +173,13 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
  
 with app.app_context():
     db.create_all()
-    # Add relationship column if it doesn't exist (for existing databases)
     try:
         import sqlalchemy as sa
         inspector = sa.inspect(db.engine)
         existing_cols = [c['name'] for c in inspector.get_columns('user')]
         if 'relationship' not in existing_cols:
             with db.engine.connect() as conn:
-                conn.execute(sa.text('ALTER TABLE user ADD COLUMN relationship VARCHAR(100) DEFAULT "family member"'))
+                conn.execute(sa.text('ALTER TABLE "user" ADD COLUMN relationship VARCHAR(100) DEFAULT \'family member\''))
                 conn.commit()
         alert_cols = [c['name'] for c in inspector.get_columns('alert')]
         if 'evidence_photo' not in alert_cols:
@@ -207,7 +188,7 @@ with app.app_context():
                 conn.commit()
     except Exception as e:
         print(f"Note: {e}")
-    
+ 
     defaults = [
         ('ambulance', 'Ambulance Unit', '0700000001'),
         ('fire',      'Fire Brigade',   '0700000002'),
@@ -228,6 +209,14 @@ def login_required(f):
         if 'user_id' not in session:
             flash("Please log in to continue.", "warning")
             return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
+ 
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('admin'):
+            return redirect(url_for('admin_login'))
         return f(*args, **kwargs)
     return decorated
  
@@ -277,25 +266,6 @@ def login():
         flash("Invalid email or password!", "danger")
         return redirect(url_for("login"))
     return render_template("login.html")
-
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        admin_user = os.getenv('ADMIN_USERNAME', 'admin')
-        admin_pass = os.getenv('ADMIN_PASSWORD', 'emergency@admin2024')
-        if username == admin_user and password == admin_pass:
-            session['admin'] = True
-            return redirect(url_for('admin_dashboard'))
-        flash('Invalid admin credentials', 'danger')
-    return render_template('admin_login.html')
-
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    if not session.get('admin'):
-        return redirect(url_for('admin_login'))
-    return render_template('admin_dashboard.html')
  
 @app.route("/logout", methods=["POST"])
 def logout():
@@ -303,6 +273,107 @@ def logout():
     flash("You have been logged out.", "info")
     return redirect(url_for("login"))
  
+# ============================
+# ADMIN ROUTES
+# ============================
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == os.getenv('ADMIN_USERNAME', 'admin') and \
+           password == os.getenv('ADMIN_PASSWORD', 'emergency@admin2024'):
+            session['admin']      = True
+            session['admin_name'] = username
+            return redirect(url_for('admin_dashboard'))
+        flash('Invalid admin credentials', 'danger')
+    return render_template('admin_login.html')
+ 
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin', None)
+    session.pop('admin_name', None)
+    return redirect(url_for('admin_login'))
+ 
+@app.route('/admin/dashboard')
+@admin_required
+def admin_dashboard():
+    # Stats
+    total_users  = User.query.count()
+    total_alerts = Alert.query.count()
+    today_start  = datetime.combine(date.today(), datetime.min.time())
+    alerts_today = Alert.query.filter(Alert.timestamp >= today_start).count()
+    unresolved   = Alert.query.filter(Alert.status != 'resolved').count()
+ 
+    # Recent alerts with user info attached
+    raw_alerts = Alert.query.order_by(Alert.timestamp.desc()).limit(50).all()
+    users_map  = {u.id: u for u in User.query.all()}
+ 
+    recent_alerts = []
+    for a in raw_alerts:
+        u = users_map.get(a.user_id)
+        a.user_name     = u.fullname if u else 'Unknown'
+        a.user_phone    = u.phone    if u else '-'
+        a.user_initials = ''.join([p[0].upper() for p in (u.fullname.split()[:2] if u else ['?'])])
+        recent_alerts.append(a)
+ 
+    # All users with alert counts and initials
+    all_users = []
+    for u in User.query.all():
+        u.alert_count = Alert.query.filter_by(user_id=u.id).count()
+        u.initials    = ''.join([p[0].upper() for p in u.fullname.split()[:2]])
+        all_users.append(u)
+ 
+    # Responder units
+    units = ResponderUnit.query.all()
+ 
+    return render_template(
+        'admin_dashboard.html',
+        total_users   = total_users,
+        total_alerts  = total_alerts,
+        alerts_today  = alerts_today,
+        unresolved    = unresolved,
+        recent_alerts = recent_alerts,
+        all_users     = all_users,
+        units         = units,
+        admin_name    = session.get('admin_name', 'Admin'),
+        now           = datetime.now().strftime('%d %b %Y, %H:%M')
+    )
+ 
+@app.route('/admin/update_status', methods=['POST'])
+@admin_required
+def admin_update_status():
+    data  = request.get_json()
+    alert = Alert.query.get(data.get('alert_id'))
+    if alert:
+        alert.status = data.get('status')
+        db.session.commit()
+    return jsonify({'status': 'ok'})
+ 
+@app.route('/admin/dispatch', methods=['POST'])
+@admin_required
+def admin_dispatch():
+    data  = request.get_json()
+    alert = Alert.query.get(data.get('alert_id'))
+    if alert:
+        alert.dispatched_to = data.get('unit')
+        alert.status        = 'responding'
+        db.session.commit()
+    return jsonify({'status': 'ok'})
+ 
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@admin_required
+def admin_delete_user(user_id):
+    user = User.query.get(user_id)
+    if user:
+        Alert.query.filter_by(user_id=user_id).delete()
+        db.session.delete(user)
+        db.session.commit()
+    return jsonify({'status': 'ok'})
+ 
+# ============================
+# PASSWORD RESET
+# ============================
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -360,18 +431,18 @@ def reset_password(token):
         return redirect(url_for('login'))
     return render_template('reset_password.html', token=token)
  
-# ----------------------------
+# ============================
 # DASHBOARD
-# ----------------------------
+# ============================
 @app.route('/dashboard')
 @login_required
 def dashboard():
     total_alerts = Alert.query.filter_by(user_id=session['user_id']).count()
     return render_template('dashboard.html', total_alerts=total_alerts)
  
-# ----------------------------
+# ============================
 # ALERT HISTORY
-# ----------------------------
+# ============================
 @app.route('/alert_history')
 @login_required
 def alert_history():
@@ -386,9 +457,9 @@ def alert_history():
     }
     return render_template('alert_history.html', alerts=alerts, counts=counts)
  
-# ----------------------------
-# UPDATE PROFILE (includes relationship)
-# ----------------------------
+# ============================
+# UPDATE PROFILE
+# ============================
 @app.route('/update_profile', methods=['POST'])
 @login_required
 def update_profile():
@@ -396,7 +467,6 @@ def update_profile():
     user = User.query.get(session['user_id'])
     if not user:
         return jsonify({'status': 'error'}), 404
-    # Allowed fields to update
     for field in ['fullname', 'phone', 'kin_name', 'kin_phone', 'kin_location', 'relationship']:
         if field in data:
             setattr(user, field, data.get(field, getattr(user, field)))
@@ -404,9 +474,9 @@ def update_profile():
     db.session.commit()
     return jsonify({'status': 'ok'})
  
-# ----------------------------
+# ============================
 # CHANGE PASSWORD
-# ----------------------------
+# ============================
 @app.route('/change_password', methods=['POST'])
 @login_required
 def change_password():
@@ -425,17 +495,15 @@ def change_password():
     db.session.commit()
     return jsonify({'status': 'ok', 'msg': 'Password changed successfully!'})
  
-# ----------------------------
-# ----------------------------
+# ============================
 # FISH AUDIO TTS
-# ----------------------------
+# ============================
 FISH_API_KEY  = os.getenv("FISH_API_KEY",  "09252bca3555437e91f13ee28335d1b3")
 FISH_VOICE_ID = os.getenv("FISH_VOICE_ID", "63ea5b49f08041dea514ee659d35ac10")
  
 @app.route('/tts', methods=['POST'])
 @login_required
 def tts():
-    """Proxy Fish Audio TTS — keeps API key server-side, avoids CORS."""
     from flask import Response
     data = request.get_json() or {}
     text = data.get('text', '').strip()
@@ -466,10 +534,9 @@ def tts():
         print(f"[Fish Audio Exception] {e}")
         return jsonify({'error': str(e)}), 500
  
- 
-# ----------------------------
+# ============================
 # PWA ROUTES
-# ----------------------------
+# ============================
 @app.route('/manifest.json')
 def manifest():
     return app.send_static_file('manifest.json')
@@ -486,8 +553,9 @@ def service_worker():
 def offline():
     return render_template('offline.html')
  
-# CHAT — GROQ PRIMARY / GEMINI FALLBACK / SWAHILI SUPPORT
-# ----------------------------
+# ============================
+# CHAT — GROQ PRIMARY / GEMINI FALLBACK
+# ============================
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
  
 SHELLY_SYSTEM_EN = (
@@ -503,7 +571,6 @@ SHELLY_SYSTEM_SW = (
 )
  
 def detect_language(text):
-    """Simple Swahili keyword detector."""
     sw_words = ['msaada','moto','ajali','polisi','damu','pumzika','pumua','nini','hii',
                 'ninaumia','hatari','dharura','gari','mgonjwa','hospitali','daktari',
                 'habari','hujambo','asante','tafadhali','sasa','haraka','nipe']
@@ -567,18 +634,16 @@ def call_gemini_chat(message, context, language):
 def chat():
     data     = request.get_json() or {}
     message  = data.get('message', '').strip()
-    language = data.get('language', 'auto')   # 'en', 'sw', or 'auto'
+    language = data.get('language', 'auto')
  
     if not message:
         return jsonify({'response': 'Please describe your emergency.'})
  
-    # Auto-detect language if not specified
     if language == 'auto':
         language = detect_language(message)
  
     msg_lower = message.lower().strip()
  
-    # Quick greetings
     greet_en = {'hi','hello','hey'}
     greet_sw = {'habari','hujambo','mambo','sasa'}
     if msg_lower in greet_en | greet_sw:
@@ -591,7 +656,6 @@ def chat():
         resp = "Kaa salama. Kwaheri!" if language == 'sw' else "Stay safe. Goodbye!"
         return jsonify({'response': resp, 'language': language})
  
-    # Build conversation context
     if 'chat_history' not in session:
         session['chat_history'] = []
     session['chat_history'].append({'role': 'user', 'content': message})
@@ -603,21 +667,14 @@ def chat():
         prefix = "User" if entry['role'] == 'user' else "Assistant"
         context += f"{prefix}: {entry['content']}\n"
  
-    # Priority 1 — Groq
     result = call_groq_chat(message, context, language)
- 
-    # Priority 2 — Gemini (fallback when Groq fails)
     if not result:
         result = call_gemini_chat(message, context, language)
- 
-    # Priority 3 — ML model
     if not result:
         try:
             result = get_response(message, language=language)
         except Exception:
             result = None
- 
-    # Priority 4 — hardcoded final fallback
     if not result:
         result = "Piga simu 999 mara moja." if language == 'sw' else "Call 999 immediately for emergency assistance."
  
@@ -625,9 +682,9 @@ def chat():
     session.modified = True
     return jsonify({'response': result, 'language': language})
  
-# ----------------------------
+# ============================
 # EMERGENCY PAGES
-# ----------------------------
+# ============================
 @app.route("/emergency/medical")
 @login_required
 def medical():
@@ -647,25 +704,20 @@ def police_report():
 @app.route("/upload_evidence", methods=["POST"])
 @login_required
 def upload_evidence():
-    """Upload photo/video evidence and attach it to the user's latest alert."""
     if 'file' not in request.files:
         return jsonify({'status': 'error', 'msg': 'No file selected.'})
- 
     file = request.files['file']
     if file.filename == '':
         return jsonify({'status': 'error', 'msg': 'No file selected.'})
- 
     if not allowed_file(file.filename):
         return jsonify({'status': 'error', 'msg': 'File type not allowed. Use JPG, PNG, GIF, WEBP, MP4 or MOV.'})
  
-    # Save file with a unique name to prevent overwriting
     ext       = file.filename.rsplit('.', 1)[1].lower()
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     filename  = secure_filename(f"evidence_{session['user_id']}_{timestamp}.{ext}")
     filepath  = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
  
-    # Attach to the user's most recent alert
     alert = Alert.query.filter_by(user_id=session['user_id'])\
                        .order_by(Alert.id.desc()).first()
     if alert:
@@ -689,9 +741,9 @@ def fire():
 def accident():
     return render_template("accident.html")
  
-# ----------------------------
+# ============================
 # SEND EMERGENCY ALERT
-# ----------------------------
+# ============================
 @app.route("/send_alert/<alert_type>", methods=["POST"])
 @login_required
 def send_alert(alert_type):
@@ -709,14 +761,13 @@ def send_alert(alert_type):
  
     user = User.query.get(session['user_id'])
     send_kin_sms(user, alert_type, lat, lng)
-    send_user_alert_email(user, alert_type, lat, lng)   # ← NEW
+    send_user_alert_email(user, alert_type, lat, lng)
  
     total = Alert.query.filter_by(user_id=session['user_id']).count()
     return jsonify({'status': 'ok', 'total_alerts': total})
  
  
 def send_user_alert_email(user, alert_type, latitude=None, longitude=None):
-    """Send an email confirmation to the user themselves after their alert fires."""
     if not user.email:
         return
     def _send():
@@ -725,7 +776,7 @@ def send_user_alert_email(user, alert_type, latitude=None, longitude=None):
             maps_line   = f"https://maps.google.com/?q={latitude},{longitude}" if latitude and longitude else "Not available"
             time_str    = datetime.now().strftime("%d %b %Y at %H:%M")
             msg = Message(
-                subject = f"🚨 Emergency Alert Sent — {alert_label}",
+                subject    = f"🚨 Emergency Alert Sent — {alert_label}",
                 recipients = [user.email]
             )
             msg.html = f"""
@@ -760,16 +811,15 @@ def send_user_alert_email(user, alert_type, latitude=None, longitude=None):
 @app.route('/alert_status_latest')
 @login_required
 def alert_status_latest():
-    """Returns the status of the user's most recent non-resolved alert."""
     alert = Alert.query.filter_by(user_id=session['user_id'])\
                        .order_by(Alert.id.desc()).first()
     if not alert:
         return jsonify({'status': None})
     return jsonify({'status': alert.status or 'pending', 'alert_id': alert.id})
  
-# ----------------------------
+# ============================
 # MAP & LOCATION
-# ----------------------------
+# ============================
 @app.route("/map")
 @login_required
 def map_page():
