@@ -34,7 +34,8 @@ app.config["MAIL_USE_TLS"]                   = True
 app.config["MAIL_USERNAME"]                  = os.getenv("MAIL_USERNAME", "chebetmcheruiyot@gmail.com")
 app.config["MAIL_PASSWORD"]                  = os.getenv("MAIL_PASSWORD", "tedmheejkmifzgas")
 app.config["MAIL_DEFAULT_SENDER"]            = ("Emergency System", app.config["MAIL_USERNAME"])
-app.config["UPLOAD_FOLDER"]                  = os.path.join(os.path.dirname(__file__), "../frontend/static/uploads")
+# FIXED: Upload folder path - now points correctly to frontend/static/uploads
+app.config["UPLOAD_FOLDER"]                  = os.path.join(os.path.dirname(__file__), "frontend", "static", "uploads")
 app.config["MAX_CONTENT_LENGTH"]             = 16 * 1024 * 1024  # 16MB max
  
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'mov'}
@@ -185,19 +186,27 @@ class ResponderUnit(db.Model):
     phone     = db.Column(db.String(20), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
  
+# Create uploads folder if it doesn't exist
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+ 
 with app.app_context():
     db.create_all()
     # Add relationship column if it doesn't exist (for existing databases)
-    import sqlalchemy as sa
-    inspector = sa.inspect(db.engine)
-    existing_cols = [c['name'] for c in inspector.get_columns('user')]
-    if 'relationship' not in existing_cols:
-        db.engine.execute('ALTER TABLE user ADD COLUMN relationship VARCHAR(100) DEFAULT "family member"')
-    alert_cols = [c['name'] for c in inspector.get_columns('alert')]
-    if 'evidence_photo' not in alert_cols:
-        db.engine.execute('ALTER TABLE alert ADD COLUMN evidence_photo VARCHAR(255)')
-    # Create uploads folder if it doesn't exist
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    try:
+        import sqlalchemy as sa
+        inspector = sa.inspect(db.engine)
+        existing_cols = [c['name'] for c in inspector.get_columns('user')]
+        if 'relationship' not in existing_cols:
+            with db.engine.connect() as conn:
+                conn.execute(sa.text('ALTER TABLE user ADD COLUMN relationship VARCHAR(100) DEFAULT "family member"'))
+                conn.commit()
+        alert_cols = [c['name'] for c in inspector.get_columns('alert')]
+        if 'evidence_photo' not in alert_cols:
+            with db.engine.connect() as conn:
+                conn.execute(sa.text('ALTER TABLE alert ADD COLUMN evidence_photo VARCHAR(255)'))
+                conn.commit()
+    except Exception as e:
+        print(f"Note: {e}")
     
     defaults = [
         ('ambulance', 'Ambulance Unit', '0700000001'),
@@ -578,7 +587,7 @@ def chat():
     # Priority 1 — Groq
     result = call_groq_chat(message, context, language)
  
-    # Priority 2 — Claude (fallback when Groq fails)
+    # Priority 2 — Gemini (fallback when Groq fails)
     if not result:
         result = call_gemini_chat(message, context, language)
  
@@ -754,208 +763,4 @@ def save_location():
     lat  = data.get("latitude")
     lng  = data.get("longitude")
     if not lat or not lng:
-        return jsonify({"status": "error", "msg": "No coordinates provided"}), 400
-    db.session.add(Alert(
-        user_id    = session['user_id'],
-        alert_type = "location_share",
-        latitude   = str(lat),
-        longitude  = str(lng)
-    ))
-    db.session.commit()
-    total = Alert.query.filter_by(user_id=session['user_id']).count()
-    return jsonify({"status": "ok", "msg": "Location saved.", "total_alerts": total})
- 
-# ============================
-# ADMIN CONFIG (unchanged)
-# ============================
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "emergency@admin2024")
- 
-def admin_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('is_admin'):
-            flash("Admin access required.", "danger")
-            return redirect(url_for('admin_login'))
-        return f(*args, **kwargs)
-    return decorated
- 
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session['is_admin']   = True
-            session['admin_name'] = username
-            return redirect(url_for('admin_dashboard'))
-        flash("Invalid admin credentials.", "danger")
-        return redirect(url_for('admin_login'))
-    return render_template('admin_login.html')
- 
-@app.route('/admin/logout')
-def admin_logout():
-    session.pop('is_admin', None)
-    session.pop('admin_name', None)
-    return redirect(url_for('admin_login'))
- 
-@app.route('/admin')
-@admin_required
-def admin_dashboard():
-    from datetime import date as dt_date
-    all_users  = User.query.all()
-    all_alerts = Alert.query.order_by(Alert.timestamp.desc()).all()
-    user_map   = {u.id: u for u in all_users}
- 
-    def enrich(a):
-        u = user_map.get(a.user_id)
-        a.user_name     = u.fullname if u else "Unknown"
-        a.user_phone    = u.phone    if u else "—"
-        a.user_initials = "".join(w[0] for w in a.user_name.split()[:2]).upper()
-        if not a.status: a.status = "pending"
-        if not hasattr(a, "dispatched_to"): a.dispatched_to = None
-        return a
- 
-    enriched = [enrich(a) for a in all_alerts]
-    for u in all_users:
-        u.initials    = "".join(w[0] for w in u.fullname.split()[:2]).upper()
-        u.alert_count = sum(1 for a in all_alerts if a.user_id == u.id)
- 
-    today        = dt_date.today()
-    alerts_today = sum(1 for a in all_alerts if a.timestamp and a.timestamp.date() == today)
-    unresolved   = sum(1 for a in all_alerts if (a.status or "pending") != "resolved")
-    units        = ResponderUnit.query.all()
- 
-    return render_template("admin_dashboard.html",
-        total_users   = len(all_users),
-        total_alerts  = len(all_alerts),
-        alerts_today  = alerts_today,
-        unresolved    = unresolved,
-        recent_alerts = enriched[:10],
-        all_alerts    = enriched,
-        users         = all_users,
-        units         = units,
-        now           = datetime.now().strftime("%d %b %Y, %H:%M"),
-        admin_name    = session.get("admin_name", "Admin")
-    )
- 
-@app.route('/admin/update_status', methods=['POST'])
-@admin_required
-def admin_update_status():
-    try:
-        data       = request.get_json(force=True)
-        alert_id   = int(data.get('alert_id'))
-        new_status = data.get('status', 'pending')
-        alert = Alert.query.filter_by(id=alert_id).first()
-        if not alert:
-            return jsonify({'status': 'error', 'msg': 'Alert not found'}), 404
-        alert.status = new_status
-        db.session.commit()
-        unresolved = Alert.query.filter(Alert.status != 'resolved').count()
-        return jsonify({'status': 'ok', 'unresolved': unresolved})
-    except Exception as e:
-        db.session.rollback()
-        print(f"[STATUS ERROR] {e}")
-        return jsonify({'status': 'error', 'msg': str(e)}), 500
- 
-@app.route('/admin/dispatch', methods=['POST'])
-@admin_required
-def admin_dispatch():
-    try:
-        data      = request.get_json(force=True)
-        alert_id  = int(data.get('alert_id'))
-        unit_type = data.get('unit_type')
-        alert = Alert.query.filter_by(id=alert_id).first()
-        if not alert:
-            return jsonify({'status': 'error', 'msg': 'Alert not found'}), 404
-        unit = ResponderUnit.query.filter_by(unit_type=unit_type).first()
-        if not unit:
-            return jsonify({'status': 'error', 'msg': 'Unit not found'}), 404
-        alert.dispatched_to = unit_type
-        alert.status        = 'responding'
-        db.session.commit()
-        print(f"[DISPATCH] {unit.name} ({unit.phone}) -> Alert #{alert_id}")
-        unresolved = Alert.query.filter(Alert.status != 'resolved').count()
-        return jsonify({'status': 'ok', 'unit_name': unit.name, 'unit_phone': unit.phone, 'unresolved': unresolved})
-    except Exception as e:
-        db.session.rollback()
-        print(f"[DISPATCH ERROR] {e}")
-        return jsonify({'status': 'error', 'msg': str(e)}), 500
- 
-@app.route('/admin/units', methods=['GET'])
-@admin_required
-def admin_get_units():
-    units = ResponderUnit.query.all()
-    return jsonify([{'id': u.id, 'unit_type': u.unit_type, 'name': u.name, 'phone': u.phone} for u in units])
- 
-@app.route('/admin/units/update', methods=['POST'])
-@admin_required
-def admin_update_unit():
-    try:
-        data = request.get_json(force=True)
-        unit = ResponderUnit.query.filter_by(unit_type=data.get('unit_type')).first()
-        if not unit:
-            return jsonify({'status': 'error', 'msg': 'Unit not found'}), 404
-        unit.name  = data.get('name',  unit.name)
-        unit.phone = data.get('phone', unit.phone)
-        db.session.commit()
-        return jsonify({'status': 'ok'})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'msg': str(e)}), 500
- 
-@app.route('/admin/change_password', methods=['POST'])
-@admin_required
-def admin_change_password():
-    global ADMIN_PASSWORD
-    data = request.get_json(force=True)
-    if data.get('current_password') != ADMIN_PASSWORD:
-        return jsonify({'status': 'error', 'msg': 'Current password incorrect.'})
-    new_pw = data.get('new_password', '')
-    if len(new_pw) < 6:
-        return jsonify({'status': 'error', 'msg': 'Password must be at least 6 characters.'})
-    if new_pw != data.get('confirm_password'):
-        return jsonify({'status': 'error', 'msg': 'Passwords do not match.'})
-    ADMIN_PASSWORD = new_pw
-    return jsonify({'status': 'ok', 'msg': 'Admin password updated!'})
- 
-# ============================
-# ADMIN NOTIFICATION API ENDPOINTS
-# ============================
-@app.route('/admin/latest_alert_id')
-@admin_required
-def latest_alert_id():
-    latest = Alert.query.order_by(Alert.id.desc()).first()
-    return jsonify({'latest_id': latest.id if latest else 0})
- 
-@app.route('/admin/unresolved_count')
-@admin_required
-def unresolved_count():
-    unresolved = Alert.query.filter(Alert.status != 'resolved').count()
-    return jsonify({'unresolved': unresolved})
- 
-@app.route('/admin/alert/<int:alert_id>')
-@admin_required
-def admin_get_alert(alert_id):
-    """Return details of a single alert — used by frontend notification system."""
-    alert = Alert.query.filter_by(id=alert_id).first()
-    if not alert:
-        return jsonify({'status': 'error', 'msg': 'Not found'}), 404
-    user = User.query.get(alert.user_id)
-    return jsonify({
-        'status':         'ok',
-        'id':             alert.id,
-        'alert_type':     alert.alert_type,
-        'user_name':      user.fullname if user else 'Unknown',
-        'user_phone':     user.phone    if user else '—',
-        'timestamp':      alert.timestamp.strftime('%d %b %Y, %H:%M') if alert.timestamp else '—',
-        'latitude':       alert.latitude,
-        'longitude':      alert.longitude,
-        'evidence_photo': f"/static/uploads/{alert.evidence_photo}" if alert.evidence_photo else None,
-    })
- 
- 
-if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+        return jsonify({"status": "error", "msg":
